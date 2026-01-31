@@ -41,34 +41,44 @@ Mở Terminal (hoặc PowerShell) và chạy lệnh:
 ```bash
 git clone [https://github.com/TEN-GITHUB-CUA-BAN/watch-store-project.git](https://github.com/TEN-GITHUB-CUA-BAN/watch-store-project.git)
 cd watch-store-project
+```
 
-**Bước 2:  Khởi động hệ thống (Build & Run) Lệnh này sẽ tải các thư viện cần thiết và khởi động Server + Database. Quá trình này có thể mất 3-5 phút trong lần đầu tiên.**
+**Bước 2: Khởi động hệ thống (Build & Run) Lệnh này sẽ tải các thư viện cần thiết và khởi động Server + Database. Quá trình này có thể mất 3-5 phút trong lần đầu tiên.**
+
+```bash
   docker-compose up --build
+```
 
 Bước 3: Khởi tạo Cơ sở dữ liệu (Chỉ chạy lần đầu) Mở một cửa sổ Terminal mới (giữ nguyên cửa sổ đang chạy server) và chạy lần lượt 2 lệnh sau:
 1.Tạo bảng dữ liệu (Tables):
 
+```bash
 docker-compose exec web python manage.py migrate
+```
 
 2. Tạo tài khoản Quản trị viên (Superuser):
 
+```bash
+
 docker-compose exec web python manage.py createsuperuser
+```
 
 ### 3.Cấu trúc thư mục
+
 watch-store/
-├── core/                # Cấu hình lõi của Django (settings, urls)
-├── store/               # App chính xử lý nghiệp vụ
-│   ├── migrations/      # Lịch sử thay đổi Database
-│   ├── templates/       # Giao diện HTML (View)
-│   ├── admin.py         # Cấu hình trang Admin (Map, JSON Widget)
-│   ├── models.py        # Định nghĩa dữ liệu (Product, Store)
-│   ├── views.py         # Logic xử lý (Controller)
-│   └── urls.py          # Định tuyến cho app Store
-├── media/               # Thư mục chứa ảnh sản phẩm upload
-├── docker-compose.yml   # File cấu hình Docker (Quan trọng)
-├── Dockerfile           # File cấu hình môi trường Python
-├── requirements.txt     # Danh sách thư viện Python
-└── manage.py            # Công cụ dòng lệnh của Django
+├── core/ # Cấu hình lõi của Django (settings, urls)
+├── store/ # App chính xử lý nghiệp vụ
+│ ├── migrations/ # Lịch sử thay đổi Database
+│ ├── templates/ # Giao diện HTML (View)
+│ ├── admin.py # Cấu hình trang Admin (Map, JSON Widget)
+│ ├── models.py # Định nghĩa dữ liệu (Product, Store)
+│ ├── views.py # Logic xử lý (Controller)
+│ └── urls.py # Định tuyến cho app Store
+├── media/ # Thư mục chứa ảnh sản phẩm upload
+├── docker-compose.yml # File cấu hình Docker (Quan trọng)
+├── Dockerfile # File cấu hình môi trường Python
+├── requirements.txt # Danh sách thư viện Python
+└── manage.py # Công cụ dòng lệnh của Django
 
 **Các lỗi thường gặp: **
 ❓ Xử lý lỗi thường gặp (Troubleshooting)
@@ -96,8 +106,6 @@ Nếu sửa code Python (.py): Server tự động reload, chỉ cần F5 trình
 
 Nếu thêm thư viện mới vào requirements.txt: Phải chạy lại docker-compose up --build.
 
-
-
 #### Trước khi bắt đầu code (Mỗi sáng): Luôn chạy lệnh này để lấy code mới nhất mà người khác vừa đẩy lên:
 
 PHẦN 1: DÀNH CHO DEVELOPER (Quy trình code hàng ngày)
@@ -107,10 +115,13 @@ Bước 1: Lấy code mới nhất về (Sync)
 Trước khi làm gì, phải chắc chắn máy mình đang có code mới nhất từ nhánh dev.
 
 PowerShell
+
 # Chuyển về nhánh dev
+
 git checkout dev
 
 # Kéo code mới nhất từ GitHub về
+
 git pull origin dev
 Bước 2: Tạo nhánh riêng (Feature Branch)
 Tuyệt đối không code trên dev. Hãy tạo nhánh mới.
@@ -118,22 +129,28 @@ Tuyệt đối không code trên dev. Hãy tạo nhánh mới.
 Quy tắc đặt tên: feature/ten-chuc-nang (Ví dụ: feature/login, feature/map-view).
 
 PowerShell
+
 # Tạo và chuyển sang nhánh mới
+
 git checkout -b feature/ten-chuc-nang-cua-ban
 Bước 3: Code và Lưu (Commit)
 Làm việc bình thường trên VS Code. Khi xong một phần việc nhỏ:
 
 PowerShell
+
 # Thêm tất cả file đã sửa vào danh sách chờ
+
 git add .
 
 # Lưu lại với ghi chú (Ghi rõ ràng, tiếng Việt không dấu hoặc tiếng Anh)
+
 git commit -m "Them giao dien dang nhap co ban"
 Bước 4: Đẩy lên GitHub (Push)
 Khi đã hoàn thành chức năng, đẩy nhánh này lên kho chứa.
 
 PowerShell
 git push -u origin feature/ten-chuc-nang-cua-ban
+
 ```
 PHẦN 2: DÀNH CHO TECH LEAD (Quy trình Merge/Duyệt Code)
 Sau khi thành viên làm xong Bước 4, họ sẽ báo bạn: "Ông ơi tôi push nhánh login rồi, merge giúp tôi với". Lúc này bạn làm như sau:
@@ -193,3 +210,4 @@ git add .
 git commit -m "Fix conflict models.py"
 git push
 Lúc này trên GitHub sẽ xanh lại -> Bấm Merge được.
+```

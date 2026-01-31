@@ -1,0 +1,18 @@
+# Bỏ qua các file biên dịch Python
+__pycache__/
+*.pyc
+
+# Bỏ qua file môi trường và database cục bộ
+.env
+db.sqlite3
+*.log
+
+# Bỏ qua thư mục dữ liệu của PostgreSQL (Do Docker quản lý)
+postgres_data/
+
+# Bỏ qua file cấu hình IDE (VS Code)
+.vscode/
+.idea/
+
+# Bỏ qua ảnh upload (Tùy chọn, nếu muốn nhẹ repo)
+media/

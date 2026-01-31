@@ -1,0 +1,8 @@
+Django==5.0.1
+psycopg2-binary>=2.9
+djangorestframework>=3.14
+djangorestframework-gis>=1.0
+django-leaflet>=0.29.0
+django-json-widget>=2.0.1
+gunicorn
+Pillow

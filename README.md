@@ -136,27 +136,31 @@ git checkout -b feature/ten-chuc-nang-cua-ban
 Bước 3: Code và Lưu (Commit)
 Làm việc bình thường trên VS Code. Khi xong một phần việc nhỏ:
 
-PowerShell
-
 # Thêm tất cả file đã sửa vào danh sách chờ
 
+```bash
 git add .
+```
 
 # Lưu lại với ghi chú (Ghi rõ ràng, tiếng Việt không dấu hoặc tiếng Anh)
 
+```bash
 git commit -m "Them giao dien dang nhap co ban"
+```
+
 Bước 4: Đẩy lên GitHub (Push)
 Khi đã hoàn thành chức năng, đẩy nhánh này lên kho chứa.
 
-PowerShell
+```bash
 git push -u origin feature/ten-chuc-nang-cua-ban
 
 ```
+
 PHẦN 2: DÀNH CHO TECH LEAD (Quy trình Merge/Duyệt Code)
 Sau khi thành viên làm xong Bước 4, họ sẽ báo bạn: "Ông ơi tôi push nhánh login rồi, merge giúp tôi với". Lúc này bạn làm như sau:
 
 1. Tạo Pull Request (PR)
-Thành viên (hoặc bạn) vào link GitHub dự án.
+   Thành viên (hoặc bạn) vào link GitHub dự án.
 
 Bạn sẽ thấy một khung vàng hiện lên: "feature/... had recent pushes..." kèm nút xanh Compare & pull request. Bấm vào đó.
 
@@ -169,7 +173,7 @@ Compare: chọn feature/... (Nhánh vừa code).
 Ghi tiêu đề và bấm Create pull request.
 
 2. Review Code (Duyệt)
-GitHub chuyển sang màn hình PR. Bạn bấm vào tab Files changed.
+   GitHub chuyển sang màn hình PR. Bạn bấm vào tab Files changed.
 
 Xem code xem có gì vô lý không (Ví dụ: quên xóa file rác, code sai logic).
 
@@ -178,7 +182,7 @@ Nếu ổn: Chuyển sang bước 3.
 Nếu chưa ổn: Comment thẳng vào dòng code đó bắt sửa lại.
 
 3. Merge (Ghép code)
-Bấm nút màu xanh lá Merge pull request -> Confirm merge.
+   Bấm nút màu xanh lá Merge pull request -> Confirm merge.
 
 Sau khi merge xong, bấm nút Delete branch (xóa nhánh feature cũ đi cho đỡ rác).
 
@@ -210,4 +214,7 @@ git add .
 git commit -m "Fix conflict models.py"
 git push
 Lúc này trên GitHub sẽ xanh lại -> Bấm Merge được.
+
+```
+
 ```

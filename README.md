@@ -34,13 +34,13 @@ Dự án được xây dựng nhằm giải quyết bài toán quản lý đa d�
 
 ### 2. Các bước triển khai
 
-**Bước 1: Clone dự án về máy**
-Mở Terminal (hoặc PowerShell) và chạy lệnh:
-```bash
-git clone [https://github.com/TEN-GITHUB-CUA-BAN/watch-store-project.git](https://github.com/TEN-GITHUB-CUA-BAN/watch-store-project.git)
-cd watch-store-project
+Bước 1: Clone dự án về máy
+    Mở Terminal (hoặc PowerShell) và chạy lệnh:
+  ```bash
+  git clone [https://github.com/TEN-GITHUB-CUA-BAN/watch-store-project.git](https://github.com/TEN-GITHUB-CUA-BAN/watch-store-project.git)
+  cd watch-store-project
 
-Bước 2: Khởi động hệ thống (Build & Run) Lệnh này sẽ tải các thư viện cần thiết và khởi động Server + Database. Quá trình này có thể mất 3-5 phút trong lần đầu tiên.
+**Bước 2:  Khởi động hệ thống (Build & Run) Lệnh này sẽ tải các thư viện cần thiết và khởi động Server + Database. Quá trình này có thể mất 3-5 phút trong lần đầu tiên.**
     docker-compose up --build
 
 Bước 3: Khởi tạo Cơ sở dữ liệu (Chỉ chạy lần đầu) Mở một cửa sổ Terminal mới (giữ nguyên cửa sổ đang chạy server) và chạy lần lượt 2 lệnh sau:
@@ -68,7 +68,7 @@ watch-store/
 ├── requirements.txt     # Danh sách thư viện Python
 └── manage.py            # Công cụ dòng lệnh của Django 
 
-
+  **Các lỗi thường gặp: **
 ❓ Xử lý lỗi thường gặp (Troubleshooting)
 Q1: Lỗi "ProgrammingError: relation 'store_category' does not exist"
 
@@ -93,3 +93,16 @@ Q4: Code xong nhưng F5 không thấy thay đổi?
 Nếu sửa code Python (.py): Server tự động reload, chỉ cần F5 trình duyệt.
 
 Nếu thêm thư viện mới vào requirements.txt: Phải chạy lại docker-compose up --build.
+
+
+
+#### Trước khi bắt đầu code (Mỗi sáng): Luôn chạy lệnh này để lấy code mới nhất mà người khác vừa đẩy lên:
+
+Bash
+git pull
+Sau khi code xong: Thực hiện bộ 3 quyền lực:
+
+Bash
+git add .
+git commit -m "Ghi rõ nội dung vừa sửa"
+git push

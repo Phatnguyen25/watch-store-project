@@ -1,0 +1,112 @@
+{% extends 'base.html' %} 
+{% load humanize %} {% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  
+  <nav class="flex text-sm text-gray-500 mb-8">
+    <a href="/" class="hover:text-blue-500 transition-colors">Trang chủ</a>
+    <span class="mx-2">/</span>
+    <a href="#" class="hover:text-blue-500 transition-colors">{{ product.category.name }}</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-900 font-medium">{{ product.name }}</span>
+  </nav>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+    <div class="space-y-4">
+      <div class="aspect-square bg-gray-100 rounded-2xl shadow-lg overflow-hidden flex items-center justify-center border border-gray-200">
+        {% if product.image %}
+        <img 
+          src="{{ product.image.url }}" 
+          alt="{{ product.name }}" 
+          class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+        >
+        {% else %}
+        <span class="text-gray-400 text-lg">Đang cập nhật ảnh</span>
+        {% endif %}
+      </div>
+      </div>
+
+    <div class="flex flex-col justify-center">
+      <div class="mb-6">
+        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider mb-3">
+          {{ product.category.name }}
+        </span>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
+          {{ product.name }}
+        </h1>
+        
+        <div class="flex items-end gap-4 mb-6">
+          <span class="text-4xl font-bold text-gray-900">{{ product.price }}₫</span>
+          {% if product.old_price %}
+          <span class="text-xl text-gray-400 line-through mb-1">{{ product.old_price }}₫</span>
+          {% endif %}
+        </div>
+
+        <p class="text-gray-600 text-lg leading-relaxed mb-8">
+          {{ product.description|truncatewords:30|default:"Một tuyệt tác thời gian với thiết kế tinh xảo, mang lại vẻ lịch lãm cho người sở hữu." }}
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+          <button class="flex-1 bg-gray-900 text-white text-lg font-semibold py-4 px-8 rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            Mua Ngay
+          </button>
+          <button class="flex-1 bg-white text-gray-900 border-2 border-gray-200 text-lg font-semibold py-4 px-8 rounded-xl hover:border-gray-900 hover:bg-gray-50 transition-all">
+            Thêm vào giỏ
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm text-gray-500">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Bảo hành chính hãng 5 năm</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Miễn phí vận chuyển</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 border-t border-gray-200 pt-12">
+    
+    <div class="lg:col-span-2">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Mô tả sản phẩm</h3>
+      <div class="prose prose-lg text-gray-600 max-w-none">
+        {{ product.description|linebreaks|default:"Nội dung mô tả chi tiết đang được cập nhật..." }}
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-2xl p-6 h-fit">
+      <h3 class="text-xl font-bold text-gray-900 mb-6">Thông số kỹ thuật</h3>
+      <div class="space-y-4">
+        <div class="flex justify-between border-b border-gray-200 pb-3 last:border-0">
+          <span class="text-gray-500">Bộ máy</span>
+          <span class="font-medium text-gray-900 text-right">{{ product.specs.machine|default:"Đang cập nhật" }}</span>
+        </div>
+        
+        <div class="flex justify-between border-b border-gray-200 pb-3 last:border-0">
+          <span class="text-gray-500">Đường kính</span>
+          <span class="font-medium text-gray-900 text-right">{{ product.specs.diameter|default:"--" }} mm</span>
+        </div>
+        
+        <div class="flex justify-between border-b border-gray-200 pb-3 last:border-0">
+          <span class="text-gray-500">Chất liệu vỏ</span>
+          <span class="font-medium text-gray-900 text-right">{{ product.specs.material|default:"Thép không gỉ" }}</span>
+        </div>
+
+        <div class="flex justify-between border-b border-gray-200 pb-3 last:border-0">
+          <span class="text-gray-500">Mặt kính</span>
+          <span class="font-medium text-gray-900 text-right">{{ product.specs.glass|default:"Sapphire" }}</span>
+        </div>
+
+        <div class="flex justify-between border-b border-gray-200 pb-3 last:border-0">
+          <span class="text-gray-500">Chống nước</span>
+          <span class="font-medium text-gray-900 text-right">{{ product.specs.water_resistance|default:"3 ATM" }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -133,7 +133,9 @@ PowerShell
 # Tạo và chuyển sang nhánh mới
 
 git checkout -b feature/ten-chuc-nang-cua-ban
+
 Bước 3: Code và Lưu (Commit)
+
 Làm việc bình thường trên VS Code. Khi xong một phần việc nhỏ:
 
 # Thêm tất cả file đã sửa vào danh sách chờ
@@ -217,4 +219,8 @@ Lúc này trên GitHub sẽ xanh lại -> Bấm Merge được.
 
 ```
 
+```
+
+```
+test git
 ```

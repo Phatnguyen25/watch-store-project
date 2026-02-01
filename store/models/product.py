@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.gis.db import models as gis_models # Thư viện xử lý bản đồ
+from django_json_widget.widgets import JSONEditorWidget
 
-# 1. Danh mục đồng hồ (Nam/Nữ/Cơ/Điện tử...)
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -9,7 +8,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-# 2. Sản phẩm Đồng hồ (Sử dụng JSONField cho thông số kỹ thuật)
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -20,18 +18,6 @@ class Product(models.Model):
     # SỨC MẠNH CỦA JSON: Lưu trữ linh hoạt (Máy, Kính, Chống nước...)
     # Ví dụ: {"movement": "Automatic", "glass": "Sapphire", "water_proof": "5ATM"}
     specs = models.JSONField(default=dict, blank=True)
-    
-    def __str__(self):
-        return self.name
-
-# 3. Cửa hàng (Sử dụng PostGIS để lưu tọa độ)
-class Store(models.Model):
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
-    phone = models.CharField(max_length=20, blank=True)
-    
-    # PointField: Lưu Kinh độ (Longitude) và Vĩ độ (Latitude)
-    location = gis_models.PointField(srid=4326) 
     
     def __str__(self):
         return self.name

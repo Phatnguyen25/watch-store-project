@@ -1,5 +1,8 @@
 {% extends 'base.html' %} 
-{% load static %} {% block content %}
+{% load humanize %}
+{% load static %} 
+
+{% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
   <div class="text-center mb-12">
     <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Bộ Sưu Tập Đồng Hồ</h1>
@@ -10,7 +13,7 @@
     {% for product in products %}
     <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 flex flex-col group">
       
-      <a href="{% url 'product_detail' product.pk %}" class="block h-64 bg-gray-100 overflow-hidden relative">
+      <a href="{% url 'store:product_detail' product.pk %}" class="block h-64 bg-gray-100 overflow-hidden relative">
         {% if product.image %}
           <img
             src="{{ product.image.url }}"
@@ -30,7 +33,7 @@
 
       <div class="p-6 flex flex-col flex-1">
         
-        <a href="{% url 'product_detail' product.pk %}" class="block">
+        <a href="{% url 'store:product_detail' product.pk %}" class="block">
             <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                 {{ product.name }}
             </h2>
@@ -42,14 +45,15 @@
 
         <div class="mt-auto flex items-center justify-between">
           <div class="flex flex-col">
-            <span class="text-2xl font-bold text-gray-900">{{ product.price }}₫</span>
+            <span class="text-2xl font-bold text-gray-900">{{ product.price|intcomma }}đ</span>
+            
             {% if product.old_price %}
-            <span class="text-xs text-gray-400 line-through">{{ product.old_price }}₫</span>
+            <span class="text-xs text-gray-400 line-through">{{ product.old_price|intcomma }}đ</span>
             {% endif %}
           </div>
 
           <a 
-            href="{% url 'product_detail' product.pk %}"
+            href="{% url 'store:product_detail' product.pk %}"
             class="px-5 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors shadow-md hover:shadow-lg transform active:scale-95"
           >
             Chi tiết

@@ -137,3 +137,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Cấu hình nơi lưu và xem ảnh
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+# test git status

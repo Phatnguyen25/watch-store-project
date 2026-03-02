@@ -21,7 +21,7 @@ def api_find_nearest_store(request):
         # - order_by: Sắp xếp từ gần đến xa
         # - first: Lấy cái đầu tiên
         nearest_store = Store.objects.annotate(
-            distance=Distance('location', user_location)
+            distance=Distance('location', user_location) 
         ).order_by('distance').first()
 
         if nearest_store:

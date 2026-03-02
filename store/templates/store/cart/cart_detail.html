@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load humanize %}  
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">Giỏ Hàng Của Bạn</h1>
+
+    {% if cart_items %}
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-100 border-b">
+                    <tr>
+                        <th class="p-4 text-left">Sản phẩm</th>
+                        <th class="p-4 text-center">Số lượng</th>
+                        <th class="p-4 text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4">
+                            <span class="font-semibold text-lg">{{ item.product.price|intcomma }}</span>
+                            <br>
+                            <span class="text-gray-500">{{ item.total_price|intcomma }} đ</span>
+                        </td>
+                        
+                        <td class="p-4 text-center">
+                            <div class="flex items-center justify-center gap-3">
+                                <a href="{% url 'store:update_cart' item.id 'decrease' %}" 
+                                   class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 font-bold transition">
+                                    -
+                                </a>
+
+                                <span class="font-bold text-lg w-8">{{ item.quantity }}</span>
+
+                                <a href="{% url 'store:update_cart' item.id 'increase' %}" 
+                                   class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 font-bold transition">
+                                    +
+                                </a>
+                            </div>
+                        </td>
+
+                        <td class="p-4 text-right">
+                            <div class="font-bold text-blue-600 text-lg mb-1">
+                                {{ item.total_price|intcomma }} đ
+                            </div>
+                            <a href="{% url 'store:remove_from_cart' item.id %}" 
+                               class="text-red-500 text-sm hover:underline hover:text-red-700"
+                               onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+                                Xóa bỏ
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-50">
+                    <tr>
+                        <td colspan="2" class="p-4 text-right font-bold text-xl">Tổng thanh toán:</td>
+                        <td class="p-4 text-right font-bold text-2xl text-red-600">
+                            {{ total_price|intcomma }} đ
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="p-6 text-right bg-gray-50 border-t">
+                <a href="#" class="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition shadow-lg">
+                    Tiến Hành Thanh Toán →
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-16 bg-white rounded-lg shadow-sm">
+            <div class="text-6xl mb-4">🛒</div>
+            <p class="text-gray-500 text-xl mb-6">Giỏ hàng của bạn đang trống trơn!</p>
+            <a href="{% url 'store:product_list' %}" class="inline-block border-2 border-blue-600 text-blue-600 font-semibold py-2 px-6 rounded hover:bg-blue-600 hover:text-white transition">
+                ← Quay lại mua sắm
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

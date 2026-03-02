@@ -49,9 +49,10 @@
           <button class="flex-1 bg-gray-900 text-white text-lg font-semibold py-4 px-8 rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
             Mua Ngay
           </button>
-          <button class="flex-1 bg-white text-gray-900 border-2 border-gray-200 text-lg font-semibold py-4 px-8 rounded-xl hover:border-gray-900 hover:bg-gray-50 transition-all">
-            Thêm vào giỏ
-          </button>
+          <a href="{% url 'store:add_to_cart' product.id %}" 
+           class="flex-1 bg-white text-gray-900 border-2 border-gray-200 text-lg font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition text-center flex items-center justify-center">
+           Thêm vào giỏ
+          </a>
         </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm text-gray-500">

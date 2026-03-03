@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Product
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from store.models.cart import CartItem # Hoặc đường dẫn chính xác đến file chứa CartItem của bạn
 def add_to_cart(request, product_id):
     """Thêm sản phẩm vào giỏ hàng Session"""
     cart = request.session.get('cart', {})
@@ -73,3 +75,49 @@ def update_cart(request, item_id, action):
         request.session['cart'] = cart
         
     return redirect('cart_detail')
+@login_required(login_url='/admin/login/')
+def checkout(request):
+    # 1. Lấy các sản phẩm đang có trong giỏ hàng của người dùng
+    cart_items = CartItem.objects.filter(user=request.user)
+    
+    # 2. Nếu giỏ hàng trống, không cho thanh toán mà quay về trang sản phẩm
+    if not cart_items.exists():
+        return redirect('store:product_list')
+        
+    # 3. Tính tổng tiền cần thanh toán
+    total_price = sum(item.total_price for item in cart_items)
+    
+    # 4. Trả về giao diện trang checkout.html cùng dữ liệu
+    return render(request, 'store/cart/checkout.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })
+@login_required(login_url='/admin/login/')
+def checkout(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+    if not cart_items.exists():
+        return redirect('store:product_list')
+        
+    total_price = sum(item.total_price for item in cart_items)
+
+    if request.method == 'POST':
+        # Lấy thông tin khách hàng điền từ Form
+        full_name = request.POST.get('full_name')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+        notes = request.POST.get('notes')
+        payment_method = request.POST.get('payment_method')
+
+        # --- ĐOẠN NÀY LÀ ĐỂ LƯU VÀO DATABASE ---
+        # Sau khi bạn tạo Model Order, chúng ta sẽ viết lệnh lưu ở đây
+        
+        # Xóa sạch giỏ hàng sau khi đặt thành công
+        cart_items.delete()
+
+        # Chuyển hướng sang trang thông báo thành công
+        return render(request, 'store/cart/order_success.html')
+
+    return render(request, 'store/cart/checkout.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })

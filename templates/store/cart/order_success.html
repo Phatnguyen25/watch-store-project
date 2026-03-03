@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-20 px-4 text-center">
+    <div class="mb-6">
+        <svg class="mx-auto h-20 w-20 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+    </div>
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Đặt hàng thành công!</h1>
+    <p class="text-lg text-gray-600 mb-8">
+        Cảm ơn bạn đã tin tưởng WatchStore. Mã đơn hàng của bạn đang được xử lý và chúng tôi sẽ sớm liên hệ để giao hàng.
+    </p>
+    <div class="flex justify-center gap-4">
+        <a href="{% url 'store:product_list' %}" class="bg-gray-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
+            Tiếp tục mua sắm
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -71,10 +71,10 @@
                     <span class="text-2xl font-black text-blue-600">{{ cart_total|intcomma }} ₫</span>
                 </div>
 
-                <button class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transition transform hover:-translate-y-1">
-                    Tiến hành Thanh Toán
-                </button>
-                <a href="{% url 'product_list' %}" class="block text-center mt-4 text-blue-600 font-semibold hover:underline">
+               <a href="{% url 'store:checkout' %}" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl block text-center hover:bg-gray-800 transition">
+    Tiến hành Thanh Toán
+</a>
+                <a href="{% url 'store:product_list' %}" class="block text-center mt-4 text-blue-600 font-semibold hover:underline">
                     ← Tiếp tục mua sắm
                 </a>
             </div>

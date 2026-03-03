@@ -45,15 +45,21 @@
           {{ product.description|truncatewords:30|default:"Một tuyệt tác thời gian với thiết kế tinh xảo, mang lại vẻ lịch lãm cho người sở hữu." }}
         </p>
 
-        <div class="flex flex-col sm:flex-row gap-4 mb-8">
-          <button class="flex-1 bg-gray-900 text-white text-lg font-semibold py-4 px-8 rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-            Mua Ngay
-          </button>
-          <a href="{% url 'store:add_to_cart' product.id %}" 
-           class="flex-1 bg-white text-gray-900 border-2 border-gray-200 text-lg font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition text-center flex items-center justify-center">
-           Thêm vào giỏ
-          </a>
-        </div>
+        <form action="{% url 'store:add_to_cart' product.id %}" method="POST" class="flex flex-col sm:flex-row gap-4 mb-8">
+    {% csrf_token %}
+    
+    <input type="hidden" name="quantity" value="1">
+
+    <button type="submit" name="action" value="buy_now" 
+            class="flex-1 bg-gray-900 text-white text-lg font-semibold py-4 rounded-md hover:bg-gray-800 transition">
+        Mua Ngay
+    </button>
+
+    <button type="submit" name="action" value="add_cart" 
+            class="flex-1 bg-white text-gray-900 border-2 border-gray-200 text-lg font-semibold py-4 rounded-md hover:bg-gray-50 transition">
+        Thêm vào giỏ
+    </button>
+</form>
 
         <div class="grid grid-cols-2 gap-4 text-sm text-gray-500">
           <div class="flex items-center gap-2">

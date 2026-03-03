@@ -16,39 +16,41 @@
                 </thead>
                 <tbody>
                     {% for item in cart_items %}
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-4">
-                            <span class="font-semibold text-lg">{{ item.product.price|intcomma }}</span>
-                            <br>
-                            <span class="text-gray-500">{{ item.total_price|intcomma }} đ</span>
-                        </td>
-                        
-                        <td class="p-4 text-center">
-                            <div class="flex items-center justify-center gap-3">
-                                <a href="{% url 'store:update_cart' item.id 'decrease' %}" 
-                                   class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 font-bold transition">
-                                    -
-                                </a>
+  <tr class="border-b hover:bg-gray-50">
+    <td class="p-4">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+                {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-xs text-gray-400">Trống</span>
+                {% endif %}
+            </div>
+            
+            <div>
+                <div class="font-semibold text-lg text-gray-900">{{ item.product.name }}</div>
+                <div class="text-gray-500 text-sm mt-1">{{ item.product.price|intcomma }} đ</div>
+            </div>
+        </div>
+    </td>
 
-                                <span class="font-bold text-lg w-8">{{ item.quantity }}</span>
+    <td class="p-4 text-center">
+        <div class="flex items-center justify-center gap-3">
+            <a href="{% url 'store:update_cart' item.id 'decrease' %}" class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 font-bold">-</a>
+            <span class="font-bold text-lg w-8">{{ item.quantity }}</span>
+            <a href="{% url 'store:update_cart' item.id 'increase' %}" class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 font-bold">+</a>
+        </div>
+    </td>
 
-                                <a href="{% url 'store:update_cart' item.id 'increase' %}" 
-                                   class="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 font-bold transition">
-                                    +
-                                </a>
-                            </div>
-                        </td>
-
-                        <td class="p-4 text-right">
-                            <div class="font-bold text-blue-600 text-lg mb-1">
-                                {{ item.total_price|intcomma }} đ
-                            </div>
-                            <a href="{% url 'store:remove_from_cart' item.id %}" 
-                               class="text-red-500 text-sm hover:underline hover:text-red-700"
-                               onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
-                                Xóa bỏ
-                            </a>
-                        </td>
+    <td class="p-4 text-right">
+        <div class="font-bold text-blue-600 text-lg mb-1">
+            {{ item.total_price|intcomma }} đ
+        </div>
+        <a href="{% url 'store:remove_from_cart' item.id %}" class="text-red-500 text-sm hover:underline hover:text-red-700" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+            Xóa bỏ
+        </a>
+    </td>
+</tr>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -63,8 +65,8 @@
             </table>
             
             <div class="p-6 text-right bg-gray-50 border-t">
-                <a href="#" class="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition shadow-lg">
-                    Tiến Hành Thanh Toán →
+    <a href="{% url 'store:checkout' %}" class="inline-block bg-green-600 text-white font-bold py-3 px-8 rounded-md hover:bg-green-700 transition">
+        Tiến Hành Thanh Toán &rarr;
                 </a>
             </div>
         </div>

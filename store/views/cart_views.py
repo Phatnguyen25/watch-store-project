@@ -19,8 +19,15 @@ def add_to_cart(request, product_id):
         cart_item.quantity += 1
         cart_item.save()
 
-    # Mua xong thì quay lại trang danh sách (tạm thời)
-    return redirect('store:product_list')
+    # Lấy tín hiệu xem khách vừa bấm nút nào từ form HTML
+    action = request.POST.get('action')
+
+    if action == 'buy_now':
+        # Nếu bấm "Mua Ngay" -> Bay thẳng sang trang Thanh toán
+        return redirect('store:checkout') 
+    else:
+        # Nếu bấm "Thêm vào giỏ" -> Bay sang trang xem Giỏ hàng
+        return redirect('store:cart_detail')
 
 # 2. Chức năng Xem giỏ hàng
 @login_required(login_url='/admin/login/')
@@ -59,3 +66,21 @@ def update_cart(request, item_id, action):
             cart_item.save()
             
     return redirect('store:cart_detail')
+# 5. Trang Thanh Toán
+@login_required(login_url='/admin/login/')
+def checkout(request):
+    # Lấy các món hàng trong giỏ ra
+    cart_items = CartItem.objects.filter(user=request.user)
+    
+    # Nếu giỏ hàng trống thì đuổi về trang chủ, không cho thanh toán
+    if not cart_items.exists():
+        return redirect('store:product_list')
+        
+    # Tính tổng tiền
+    total_price = sum(item.total_price for item in cart_items)
+    
+    # Đưa dữ liệu sang trang checkout.html
+    return render(request, 'store/cart/checkout.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })

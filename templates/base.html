@@ -50,19 +50,53 @@
             </div>
           </div>
 
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2 sm:space-x-4">
+            {% if user.is_authenticated %}
+
+            <div
+              class="hidden sm:flex items-center gap-2 border-r border-gray-200 pr-4"
+            >
+              <span class="text-sm font-medium text-gray-600"
+                >Chào,
+                <strong class="text-gray-900">{{ user.username }}</strong></span
+              >
+              <form method="post" action="/admin/logout/?next=/" class="inline">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded hover:bg-red-50 transition"
+                >
+                  Thoát
+                </button>
+              </form>
+            </div>
+
+            {% if user.is_staff %}
             <a
               href="{% url 'dashboard_home' %}"
               class="bg-gray-800 text-white hover:bg-black px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 shadow-sm"
             >
-              💻 Trang Quản Trị
+              💻 <span class="hidden md:inline">Quản Trị</span>
             </a>
+            {% endif %} {% else %}
+
+            <a
+              href="/admin/login/?next=/"
+              class="text-gray-600 hover:text-blue-600 text-sm font-bold px-3 py-2 transition"
+            >
+              Đăng nhập
+            </a>
+
+            {% endif %}
 
             <a
               href="{% url 'cart_detail' %}"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center shadow-sm"
             >
-              🛒 Giỏ hàng (0)
+              🛒
+              <span class="hidden md:inline ml-2"
+                >Giỏ hàng ({{ cart_count|default:0 }})</span
+              >
             </a>
           </div>
         </div>

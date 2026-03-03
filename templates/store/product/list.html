@@ -1,67 +1,309 @@
-{% extends 'base.html' %} 
-{% load humanize %}
-{% load static %} 
-
-{% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-  <div class="text-center mb-12">
-    <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Bộ Sưu Tập Đồng Hồ</h1>
-    <p class="text-lg text-gray-500">Đẳng cấp thời gian trên cổ tay bạn</p>
-  </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-    {% for product in products %}
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 flex flex-col group">
-      
-      <a href="{% url 'product_detail' product.pk %}" class="block h-64 bg-gray-100 overflow-hidden relative">
-        {% if product.image %}
-          <img
-            src="{{ product.image.url }}"
-            alt="{{ product.name }}"
-            class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
-          />
-        {% else %}
-          <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200">
-            <span>Chưa có ảnh</span>
-          </div>
-        {% endif %}
-        
-        <span class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-900 shadow-sm">
-            {{ product.category.name }}
-        </span>
-      </a>
-
-      <div class="p-6 flex flex-col flex-1">
-        
-        <a href="{% url 'product_detail' product.pk %}" class="block">
-            <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                {{ product.name }}
-            </h2>
-        </a>
-
-        <p class="text-sm text-gray-500 mb-4">
-          Máy: <span class="font-medium text-gray-700">{{ product.specs.machine|default:"Đang cập nhật" }}</span>
-        </p>
-
-        <div class="mt-auto flex items-center justify-between">
-          <div class="flex flex-col">
-            <span class="text-2xl font-bold text-gray-900">{{ product.price|intcomma }}đ</span>
-            
-            {% if product.old_price %}
-            <span class="text-xs text-gray-400 line-through">{{ product.old_price|intcomma }}đ</span>
-            {% endif %}
-          </div>
-
-          <a 
-            href="{% url 'product_detail' product.pk %}"
-            class="px-5 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors shadow-md hover:shadow-lg transform active:scale-95"
+{% extends 'base.html' %} {% load humanize %} {% block content %}
+<div class="relative bg-gray-900 overflow-hidden">
+  <div class="max-w-7xl mx-auto">
+    <div
+      class="relative z-10 pb-8 bg-gray-900 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-16 px-4 sm:px-6 lg:px-8"
+    >
+      <main class="mt-10 mx-auto max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
+        <div class="sm:text-center lg:text-left">
+          <h1
+            class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl mb-4"
           >
-            Chi tiết
-          </a>
+            <span class="block">Đẳng cấp trên cổ tay.</span>
+            <span class="block text-blue-500 mt-2"
+              >Trải nghiệm O2O vượt trội.</span
+            >
+          </h1>
+          <p
+            class="mt-3 text-base text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0"
+          >
+            Hệ thống đồng hồ chính hãng tích hợp công nghệ không gian PostGIS.
+            Đặt hàng trực tuyến, nhận hàng và bảo hành tại cửa hàng gần bạn nhất
+            chỉ với một cú click.
+          </p>
+          <div class="mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
+            <a
+              href="#new-arrivals"
+              class="w-full sm:w-auto flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg transition shadow-lg hover:shadow-blue-500/50"
+            >
+              Khám phá Bộ Sưu Tập
+            </a>
+            <a
+              href="{% url 'store_locator' %}"
+              class="mt-3 sm:mt-0 w-full sm:w-auto flex items-center justify-center px-8 py-3 border border-gray-600 text-base font-bold rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white md:py-4 md:text-lg transition"
+            >
+              📍 Tìm Cửa Hàng Gần Nhất
+            </a>
+          </div>
         </div>
+      </main>
+    </div>
+  </div>
+  <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+    <img
+      class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full opacity-70 hover:opacity-100 transition duration-1000"
+      src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1350&q=80"
+      alt="Đồng hồ cao cấp"
+    />
+  </div>
+</div>
+
+<div class="bg-white py-12 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+      <div
+        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
+      >
+        <span class="text-4xl mb-4">📱</span>
+        <h3 class="text-lg font-bold text-gray-900">1. Đặt hàng Online</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Giao diện trực quan, thông tin minh bạch.
+        </p>
+      </div>
+      <div
+        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
+      >
+        <span class="text-4xl mb-4">🗺️</span>
+        <h3 class="text-lg font-bold text-gray-900">2. Thuật toán PostGIS</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Định vị thông minh cửa hàng gần bạn nhất.
+        </p>
+      </div>
+      <div
+        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
+      >
+        <span class="text-4xl mb-4">🏪</span>
+        <h3 class="text-lg font-bold text-gray-900">3. Trải nghiệm Offline</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Nhận hàng và bảo hành tại điểm O2O.
+        </p>
       </div>
     </div>
-    {% endfor %}
+  </div>
+</div>
+
+<div class="bg-gray-50 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-extrabold text-gray-900 mb-6">
+      Khám Phá Theo Danh Mục
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <a
+        href="#"
+        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1622434641406-a158123450f9?auto=format&fit=crop&w=500&q=80"
+          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
+        />
+        <span
+          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
+          >ĐỒNG HỒ NAM</span
+        >
+      </a>
+      <a
+        href="#"
+        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1508656961554-47b2c5890c9b?auto=format&fit=crop&w=500&q=80"
+          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
+        />
+        <span
+          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
+          >ĐỒNG HỒ NỮ</span
+        >
+      </a>
+      <a
+        href="#"
+        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1548171915-e76a3e1eb520?auto=format&fit=crop&w=500&q=80"
+          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
+        />
+        <span
+          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
+          >MÁY CƠ (AUTO)</span
+        >
+      </a>
+      <a
+        href="#"
+        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=500&q=80"
+          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
+        />
+        <span
+          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
+          >SMARTWATCH</span
+        >
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="new-arrivals" class="bg-white py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div
+      class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4"
+    >
+      <div>
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+          Siêu Phẩm Mới Nhất
+        </h2>
+        <p class="text-gray-500 mt-2">
+          Cập nhật những mẫu đồng hồ vừa cập bến hệ thống.
+        </p>
+      </div>
+      <a
+        href="#"
+        class="hidden md:block text-blue-600 hover:text-blue-800 font-semibold transition"
+        >Xem tất cả →</a
+      >
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {% for p in products|slice:":4" %}
+      <div
+        class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group flex flex-col"
+      >
+        <a
+          href="{% url 'product_detail' p.pk %}"
+          class="relative h-72 overflow-hidden bg-gray-100 block"
+        >
+          {% if p.image %}
+          <img
+            src="{{ p.image.url }}"
+            alt="{{ p.name }}"
+            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+          />
+          {% else %}
+          <div
+            class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200 text-5xl"
+          >
+            ⌚
+          </div>
+          {% endif %}
+          <div
+            class="absolute top-3 right-3 bg-red-500 px-3 py-1 text-xs font-bold text-white rounded-md shadow-sm"
+          >
+            MỚI
+          </div>
+          <div
+            class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-black text-blue-700 rounded-full shadow-sm"
+          >
+            O2O READY
+          </div>
+        </a>
+        <div class="p-5 flex-grow flex flex-col justify-between">
+          <h3
+            class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight hover:text-blue-600 transition"
+          >
+            <a href="{% url 'product_detail' p.pk %}">{{ p.name }}</a>
+          </h3>
+          <div class="mt-4">
+            <p class="text-xl font-black text-red-600 mb-4">
+              {{ p.price|intcomma }} ₫
+            </p>
+            <div class="flex space-x-2">
+              <a
+                href="{% url 'add_to_cart' p.pk %}"
+                class="flex-1 text-center bg-gray-900 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+              >
+                Thêm vào giỏ
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="relative bg-blue-900 py-16">
+  <div class="absolute inset-0 overflow-hidden">
+    <img
+      src="https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=1500&q=80"
+      alt="Banner"
+      class="w-full h-full object-cover opacity-20"
+    />
+  </div>
+  <div
+    class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center lg:text-left flex flex-col lg:flex-row items-center justify-between"
+  >
+    <div class="mb-8 lg:mb-0 lg:max-w-2xl">
+      <h2 class="text-3xl font-extrabold text-white sm:text-4xl tracking-tight">
+        Bảo dưỡng trọn đời tại mọi chi nhánh.
+      </h2>
+      <p class="mt-4 text-lg text-blue-100">
+        Tìm cửa hàng gần nhất qua hệ thống PostGIS để được vệ sinh và thay pin
+        miễn phí.
+      </p>
+    </div>
+    <a
+      href="{% url 'store_locator' %}"
+      class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-lg text-blue-900 bg-white hover:bg-gray-50 shadow-xl transition transform hover:-translate-y-1"
+    >
+      📍 Trải nghiệm hệ thống O2O
+    </a>
+  </div>
+</div>
+
+<div class="bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2
+      class="text-3xl font-extrabold text-gray-900 tracking-tight mb-8 text-center"
+    >
+      Gợi Ý Dành Riêng Cho Bạn
+    </h2>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+      {% for p in products %}
+      <div
+        class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 overflow-hidden group"
+      >
+        <a
+          href="{% url 'product_detail' p.pk %}"
+          class="relative h-48 md:h-56 overflow-hidden bg-gray-100 block"
+        >
+          {% if p.image %}
+          <img
+            src="{{ p.image.url }}"
+            alt="{{ p.name }}"
+            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
+          />
+          {% else %}
+          <div
+            class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200 text-3xl"
+          >
+            ⌚
+          </div>
+          {% endif %}
+        </a>
+        <div class="p-4">
+          <h3
+            class="text-sm md:text-base font-bold text-gray-900 mb-1 truncate hover:text-blue-600"
+          >
+            <a href="{% url 'product_detail' p.pk %}">{{ p.name }}</a>
+          </h3>
+          <p class="text-base md:text-lg font-black text-blue-600 mt-2">
+            {{ p.price|intcomma }} ₫
+          </p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-12 text-center">
+      <button
+        class="px-8 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition"
+      >
+        Tải thêm sản phẩm ⬇️
+      </button>
+    </div>
   </div>
 </div>
 {% endblock %}

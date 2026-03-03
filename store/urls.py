@@ -13,6 +13,13 @@ urlpatterns = [
     # --- TRANG CHỦ & SẢN PHẨM ---
     path('', product_views.product_list, name='product_list'),          
     path('product/<int:pk>/', product_views.product_detail, name='product_detail'),
+    path('dashboard/stores/', dashboard_views.dashboard_store_list, name='dashboard_store_list'),
+    path('dashboard/products/add/', dashboard_views.product_create, name='product_create'),
+    path('dashboard/products/edit/<int:pk>/', dashboard_views.product_update, name='product_update'),
+    path('dashboard/products/delete/<int:pk>/', dashboard_views.product_delete, name='product_delete'),
+    path('dashboard/stores/add/', dashboard_views.store_create, name='store_create'),
+    path('dashboard/stores/edit/<int:pk>/', dashboard_views.store_update, name='store_update'),
+    path('dashboard/stores/delete/<int:pk>/', dashboard_views.store_delete, name='store_delete'),
 
     # --- BẢN ĐỒ ---
     path('store-locator/', store_views.store_locator, name='store_locator'),

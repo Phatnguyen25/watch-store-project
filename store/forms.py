@@ -1,7 +1,19 @@
 # store/forms.py
 from django import forms
 from .models import Product
+from leaflet.forms.widgets import LeafletWidget
 
+from .models import Store # Đảm bảo đã import Store
+
+class StoreForm(forms.ModelForm):
+    class Meta:
+        model = Store
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-lg focus:ring-blue-500'}),
+            'address': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-lg focus:ring-blue-500'}),
+            'location': LeafletWidget(attrs={'map_width': '100%', 'map_height': '300px'})
+        }
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product

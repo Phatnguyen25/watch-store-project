@@ -3,8 +3,7 @@ from django.urls import path
 # NHÌN KỸ DÒNG NÀY: Phải import đích danh cart_views
 from .views import product_views, store_views, dashboard_views, cart_views 
 
-
-
+app_name = 'store'
 urlpatterns = [
     # --- DASHBOARD ---
     path('dashboard/', dashboard_views.dashboard_home, name='dashboard_home'),
@@ -31,4 +30,6 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', cart_views.remove_from_cart, name='remove_from_cart'),
     path('cart/update/<int:item_id>/<str:action>/', cart_views.update_cart, name='update_cart'),
     path('checkout/', cart_views.checkout, name='checkout'),
+    path('cart/update/<int:item_id>/<str:action>/', cart_views.update_cart, name='update_cart'),
+    path('checkout/success/', cart_views.checkout_success, name='checkout_success'),
 ]

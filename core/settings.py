@@ -140,3 +140,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 # test git status
+import os
+
+# Cấu hình để chạy được tính năng bản đồ trên Windows
+if os.name == 'nt':
+    OSGEO4W_ROOT = r'C:\OSGeo4W'
+    os.environ['PATH'] = OSGEO4W_ROOT + r'\bin;' + os.environ['PATH']
+    # Kiểm tra file trong C:\OSGeo4W\bin xem tên chính xác là gì (307, 308 hay 309)
+    GDAL_LIBRARY_PATH = OSGEO4W_ROOT + r'\bin\gdal309.dll' 
+    GEOS_LIBRARY_PATH = OSGEO4W_ROOT + r'\bin\geos_c.dll'

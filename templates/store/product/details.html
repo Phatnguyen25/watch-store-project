@@ -68,10 +68,10 @@
             class="flex-1 bg-blue-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition transform hover:-translate-y-1"
           >
             Thêm vào giỏ hàng
-          </button>
-          <button
-            class="bg-gray-100 text-gray-600 p-4 rounded-xl hover:bg-gray-200 transition"
-          >
+          <a href="{% url 'store:add_to_cart' product.id %}" 
+   class="w-full sm:w-auto flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl text-center hover:bg-gray-800 transition block">
+    Thêm vào giỏ hàng
+</a>
             <svg
               class="w-6 h-6"
               fill="none"

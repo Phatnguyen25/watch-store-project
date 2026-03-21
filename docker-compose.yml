@@ -1,6 +1,4 @@
-version: '3.8'
-
-services:
+﻿services:
   # Service 1: Database PostGIS
   db:
     image: postgis/postgis:15-3.4-alpine
@@ -23,7 +21,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - db
     environment:

@@ -23,7 +23,17 @@ urlpatterns = [
     # --- BẢN ĐỒ ---
     path('store-locator/', store_views.store_locator, name='store_locator'),
     path('api/find-nearest/', store_views.api_find_nearest_store, name='api_find_nearest'),
-    
+    # --- MẴ GIẢM GIÁ ---
+    path('dashboard/coupons/', dashboard_views.dashboard_coupon_list, name='dashboard_coupon_list'),
+    path('dashboard/coupons/add/', dashboard_views.coupon_create, name='coupon_create'),
+    path('dashboard/coupons/edit/<int:pk>/', dashboard_views.coupon_update, name='coupon_update'),
+    path('dashboard/coupons/delete/<int:pk>/', dashboard_views.coupon_delete, name='coupon_delete'),
+        
+    # --- DANH MỤC ---
+    path('dashboard/categories/', dashboard_views.dashboard_category_list, name='dashboard_category_list'),
+    path('dashboard/categories/add/', dashboard_views.category_create, name='category_create'),
+    path('dashboard/categories/edit/<int:pk>/', dashboard_views.category_update, name='category_update'),
+    path('dashboard/categories/delete/<int:pk>/', dashboard_views.category_delete, name='category_delete'),
     # --- GIỎ HÀNG (Đã sửa views -> cart_views) ---
     path('cart/', cart_views.cart_detail, name='cart_detail'),
     path('add-to-cart/<int:product_id>/', cart_views.add_to_cart, name='add_to_cart'),

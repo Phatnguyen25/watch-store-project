@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl font-extrabold text-gray-900 mb-8">📦 Thông tin Giao hàng</h1>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <div class="lg:w-2/3">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <form action="{% url 'store:checkout' %}" method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Họ và Tên</label>
+                            <input type="text" name="full_name" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Số điện thoại</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Địa chỉ nhận hàng</label>
+                            <textarea name="address" rows="3" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6 mt-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Ghi chú đơn hàng (Tùy chọn)</label>
+                        <textarea name="note" rows="3" placeholder="Ghi chú thêm về đơn hàng (ví dụ: giao giờ hành chính, gọi trước khi giao...)" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition"></textarea>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block text-sm font-bold text-gray-700 mb-4">Phương thức thanh toán</label>
+                        <div class="space-y-4">
+                            
+                            <label class="flex items-center p-4 border border-blue-600 rounded-xl bg-blue-50 cursor-pointer transition">
+                                <input type="radio" name="payment_method" value="COD" id="radio-cod" checked onchange="toggleBankInfo()" class="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <div class="ml-4">
+                                    <span class="block text-gray-900 font-bold">Thanh toán khi nhận hàng (COD)</span>
+                                    <span class="block text-gray-500 text-sm mt-1">Khách hàng thanh toán bằng tiền mặt khi shipper giao hàng tới.</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                                <input type="radio" name="payment_method" value="BANK_TRANSFER" id="radio-bank" onchange="toggleBankInfo()" class="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <div class="ml-4">
+                                    <span class="block text-gray-900 font-bold">Chuyển khoản ngân hàng</span>
+                                    <span class="block text-gray-500 text-sm mt-1">Bạn sẽ chuyển khoản qua số tài khoản của cửa hàng.</span>
+                                </div>
+                            </label>
+                            
+                            <div id="bank-info" class="hidden mt-4 p-5 bg-gray-50 border border-gray-200 rounded-xl">
+                                <h4 class="font-bold text-gray-900 mb-3 border-b pb-2">Thông tin chuyển khoản:</h4>
+                                <div class="space-y-2 text-sm text-gray-700">
+                                    <p><span class="font-semibold w-28 inline-block">Ngân hàng:</span> Vietcombank (VCB)</p>
+                                    <p><span class="font-semibold w-28 inline-block">Chủ tài khoản:</span> NGUYEN VAN A</p>
+                                    <p><span class="font-semibold w-28 inline-block">Số tài khoản:</span> <span class="font-bold text-blue-600 text-lg">0123456789</span></p>
+                                    <p><span class="font-semibold w-28 inline-block">Nội dung CK:</span> <span class="font-mono bg-yellow-100 px-2 py-1 rounded">Thanh toan don hang [SĐT của bạn]</span></p>
+                                </div>
+                                <p class="text-xs text-red-500 mt-3 italic">* Lưu ý: Đơn hàng sẽ chỉ được xử lý sau khi hệ thống nhận được thanh toán.</p>
+                            </div>
+                            </div>
+                    </div>
+                    
+                    <button type="submit" class="mt-8 w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-lg hover:bg-blue-700 transition transform hover:-translate-y-1 shadow-lg">
+                        Xác nhận Đặt hàng
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:w-1/3">
+            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200 sticky top-24">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-4">Đơn hàng của bạn</h2>
+                
+                <ul class="mb-6 space-y-4">
+                    {% for item in cart_items %}
+                    <li class="flex justify-between text-sm">
+                        <span class="text-gray-600 line-clamp-1 pr-4">{{ item.quantity }}x {{ item.name }}</span>
+                        <span class="font-semibold text-gray-900 whitespace-nowrap">{{ item.total|intcomma }} ₫</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+                    <span class="text-xl font-bold text-gray-900">Tổng cộng:</span>
+                    <span class="text-2xl font-black text-blue-600">{{ cart_total|intcomma }} ₫</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleBankInfo() {
+        const isBank = document.getElementById('radio-bank').checked;
+        const bankInfoDiv = document.getElementById('bank-info');
+        if (isBank) {
+            bankInfoDiv.classList.remove('hidden');
+        } else {
+            bankInfoDiv.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

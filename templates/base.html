@@ -33,17 +33,17 @@
 
             <div class="hidden md:ml-8 md:flex md:space-x-6">
               <a
-                href="{% url 'product_list' %}"
+                href="{% url 'store:product_list' %}"
                 class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
                 >Trang chủ</a
               >
               <a
-                href="{% url 'product_list' %}"
+                href="{% url 'store:product_list' %}"
                 class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
                 >Sản phẩm</a
               >
               <a
-                href="{% url 'store_locator' %}"
+                href="{% url 'store:store_locator' %}"
                 class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
                 >📍 Tìm cửa hàng</a
               >
@@ -73,7 +73,7 @@
 
             {% if user.is_staff %}
             <a
-              href="{% url 'dashboard_home' %}"
+              href="{% url 'store:dashboard_home' %}"
               class="bg-gray-800 text-white hover:bg-black px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 shadow-sm"
             >
               💻 <span class="hidden md:inline">Quản Trị</span>
@@ -90,7 +90,7 @@
             {% endif %}
 
             <a
-              href="{% url 'cart_detail' %}"
+              href="{% url 'store:cart_detail' %}"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center shadow-sm"
             >
               🛒

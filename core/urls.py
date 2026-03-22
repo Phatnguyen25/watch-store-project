@@ -22,8 +22,7 @@ from django.contrib import admin
 
 
 urlpatterns = [
-   
-    path('', include('store.urls')), # Chuyển hướng trang chủ về app store
+    path('', include(('store.urls','store'), namespace='store')), # Chuyển hướng trang chủ về app store
 
     path('admin/', admin.site.urls),
 ]

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from store.models import Product, Coupon
+from store.models.order import Order, OrderItem
 from django.contrib.humanize.templatetags.humanize import intcomma
 
 def get_cart_data(request):
@@ -102,13 +103,38 @@ def checkout(request):
     if not cart:
         return redirect('store:product_list')
 
+    cart_items, cart_total = get_cart_data(request)
+
     if request.method == 'POST':
-        # Sau này Tech Lead viết logic tạo Order vào DB ở đây nhé
+        full_name = request.POST.get('full_name')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+        
+        user = request.user if request.user.is_authenticated else None
+        
+        order = Order.objects.create(
+            user=user,
+            full_name=full_name,
+            phone=phone,
+            address=address,
+            total_price=cart_total,
+            status='Pending'
+        )
+        
+        for item in cart_items:
+            product = Product.objects.get(id=item['product_id'])
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                price=item['price'],
+                quantity=item['quantity']
+            )
+            
         request.session['cart'] = {}
         request.session.modified = True
-        return redirect('store:checkout_success')
+        
+        return redirect('store:order_detail', order_id=order.id)
 
-    cart_items, cart_total = get_cart_data(request)
     return render(request, 'store/cart/checkout.html', {
         'cart_items': cart_items,
         'cart_total': cart_total,

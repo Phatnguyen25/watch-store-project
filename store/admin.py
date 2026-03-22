@@ -2,7 +2,7 @@ from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin  # Import giao diện bản đồ
 from django_json_widget.widgets import JSONEditorWidget # Import giao diện sửa JSON
 from django.db import models
-from .models import Category, Product, Store, Coupon
+from .models import Category, Product, Store, Coupon, Order, OrderItem
 
 
 
@@ -35,4 +35,16 @@ class CouponAdmin(admin.ModelAdmin):
     list_display = ['code', 'discount_percent', 'active']
     list_filter = ['active']
     search_fields = ['code']
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    raw_id_fields = ['product']
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'full_name', 'phone', 'total_price', 'status', 'created_at']
+    list_editable = ['status']
+    list_filter = ['status', 'created_at']
+    search_fields = ['full_name', 'phone', 'address']
+    inlines = [OrderItemInline]
 

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Product, Store, Category, Coupon
-# Nhớ import thêm CategoryForm và CouponForm vào nhé
-from store.forms import ProductForm, StoreForm, CategoryForm, CouponForm
+from store.models.order import Order
+from store.forms import ProductForm, StoreForm, CategoryForm, CouponForm, OrderForm
 
 def dashboard_home(request):
     """VIEW ĐỘNG: Lấy số liệu thật từ Database cho trang Tổng quan"""
@@ -9,12 +9,14 @@ def dashboard_home(request):
     total_stores = Store.objects.count()
     total_categories = Category.objects.count()
     total_coupons = Coupon.objects.count()
+    total_orders = Order.objects.count()
 
     context = {
         'total_products': total_products,
         'total_stores': total_stores,
         'total_categories': total_categories,
         'total_coupons': total_coupons,
+        'total_orders': total_orders,
     }
     return render(request, 'store/dashboard/index.html', context)
 
@@ -33,6 +35,21 @@ def dashboard_category_list(request):
 def dashboard_coupon_list(request):
     coupons = Coupon.objects.all().order_by('-id')
     return render(request, 'store/dashboard/coupon_list.html', {'coupons': coupons})
+
+def dashboard_order_list(request):
+    orders = Order.objects.all().order_by('-created_at')
+    return render(request, 'store/dashboard/order_list.html', {'orders': orders})
+
+def dashboard_order_update(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            return redirect('store:dashboard_order_list')
+    else:
+        form = OrderForm(instance=order)
+    return render(request, 'store/dashboard/general_form.html', {'form': form, 'title': f'Sửa Đơn Hàng #{order.id}'})
 
 
 # ==========================================

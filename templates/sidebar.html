@@ -12,6 +12,9 @@
         <a href="{% url 'store:dashboard_product_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'product' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>📦</span> Sản phẩm
         </a>
+        <a href="{% url 'store:dashboard_order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'order' in request.path and 'dashboard' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>🛒</span> Đơn hàng
+        </a>
         <a href="{% url 'store:dashboard_category_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'categor' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>📁</span> Danh mục
         </a>

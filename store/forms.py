@@ -1,5 +1,6 @@
 from django import forms
-from .models import Product, Store, Category, Coupon # Import gom chung cho gọn
+from .models import Product, Store, Category, Coupon
+from .models.order import Order
 from leaflet.forms.widgets import LeafletWidget
 
 # ==========================================
@@ -64,4 +65,15 @@ class CouponForm(forms.ModelForm):
             'code': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border rounded-lg focus:ring-blue-500 uppercase', 'placeholder': 'VD: FREESHIP'}),
             'discount_percent': forms.NumberInput(attrs={'class': 'w-full px-4 py-2 border rounded-lg focus:ring-blue-500', 'placeholder': '10'}),
             'active': forms.CheckboxInput(attrs={'class': 'h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer mt-2'}),
+        }
+
+# ==========================================
+# 5. FORM ĐƠN HÀNG
+# ==========================================
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['status']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'w-full mt-1 px-4 py-2 border rounded-lg focus:ring-blue-500'}),
         }

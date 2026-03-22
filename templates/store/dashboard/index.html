@@ -4,7 +4,11 @@
 
 {% block dashboard_content %}
 <div class="max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-indigo-500">
+            <h3 class="text-gray-500 text-sm font-bold uppercase mb-1">Đơn Hàng</h3>
+            <p class="text-3xl font-black text-gray-900">{{ total_orders|default:"0" }}</p>
+        </div>
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-blue-500">
             <h3 class="text-gray-500 text-sm font-bold uppercase mb-1">Tổng Sản Phẩm</h3>
             <p class="text-3xl font-black text-gray-900">{{ total_products|default:"0" }}</p>

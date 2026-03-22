@@ -1,4 +1,4 @@
-﻿services:
+services:
   # Service 1: Database PostGIS
   db:
     image: postgis/postgis:15-3.4-alpine
@@ -33,3 +33,5 @@
 
 volumes:
   postgres_data:
+    external: true
+    name: wacth-store_postgres_data

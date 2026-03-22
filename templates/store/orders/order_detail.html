@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Chi tiết Đơn hàng #{{ order.id }}</h1>
+        <a href="{% url 'store:order_list' %}" class="text-blue-600 hover:underline">Quay lại danh sách</a>
+    </div>
+
+    <!-- Progress Tracker -->
+    <div class="bg-white p-6 rounded-lg shadow mb-8">
+        <h2 class="text-lg font-bold mb-4">Tiến trình đơn hàng</h2>
+        <div class="relative pt-1">
+            <div class="flex mb-2 items-center justify-between">
+                <div>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full {% if order.status == 'Pending' or order.status == 'Processing' or order.status == 'Shipped' or order.status == 'Delivered' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">Chờ xử lý</span>
+                </div>
+                <div>
+                     <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full {% if order.status == 'Processing' or order.status == 'Shipped' or order.status == 'Delivered' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">Đang xử lý</span>
+                </div>
+                <div>
+                     <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full {% if order.status == 'Shipped' or order.status == 'Delivered' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">Đang giao</span>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full {% if order.status == 'Delivered' %}bg-green-200 text-green-800{% else %}bg-gray-200 text-gray-600{% endif %}">Đã nhận</span>
+                </div>
+            </div>
+            {% if order.status == 'Cancelled' %}
+            <div class="mt-2 text-center text-red-600 font-bold">Đơn hàng này đã bị hủy.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Order Items -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-bold mb-4 border-b pb-2">Sản phẩm đã đặt</h2>
+            <ul class="space-y-4">
+                {% for item in order.items.all %}
+                    <li class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-16 h-16 object-cover rounded-md border mr-4">
+                            {% else %}
+                                <div class="w-16 h-16 bg-gray-100 rounded-md border mr-4 flex items-center justify-center text-gray-400">Ảnh</div>
+                            {% endif %}
+                            <div>
+                                <p class="font-semibold">{{ item.product.name }}</p>
+                                <p class="text-sm text-gray-500">Số lượng: {{ item.quantity }}</p>
+                            </div>
+                        </div>
+                        <p class="font-bold text-blue-600">{{ item.price|intcomma }} ₫</p>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="mt-6 pt-4 border-t flex justify-between items-center">
+                <span class="font-bold text-lg">Tổng cộng:</span>
+                <span class="font-bold text-2xl text-blue-600">{{ order.total_price|intcomma }} ₫</span>
+            </div>
+        </div>
+
+        <!-- Order Information -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-bold mb-4 border-b pb-2">Thông tin giao hàng</h2>
+            <div class="space-y-3">
+                <p><span class="text-gray-500 w-32 inline-block">Khách hàng:</span> <span class="font-medium">{{ order.full_name }}</span></p>
+                <p><span class="text-gray-500 w-32 inline-block">Số điện thoại:</span> <span class="font-medium">{{ order.phone }}</span></p>
+                <p><span class="text-gray-500 w-32 inline-block">Địa chỉ:</span> <span class="font-medium">{{ order.address }}</span></p>
+                <p><span class="text-gray-500 w-32 inline-block">Ngày đặt:</span> <span class="font-medium">{{ order.created_at|date:"d/m/Y H:i" }}</span></p>
+                 <p><span class="text-gray-500 w-32 inline-block">Trạng thái:</span> 
+                    <span class="font-bold {% if order.status == 'Cancelled' %}text-red-600{% elif order.status == 'Delivered' %}text-green-600{% else %}text-blue-600{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

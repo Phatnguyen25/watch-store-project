@@ -6,3 +6,4 @@ django-leaflet>=0.29.0
 django-json-widget>=2.0.1
 gunicorn
 Pillow
+requests

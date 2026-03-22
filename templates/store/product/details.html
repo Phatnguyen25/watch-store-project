@@ -1,41 +1,21 @@
 {% extends 'base.html' %} {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <a
-    href="#"
-    class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8 font-medium transition"
-  >
-    <svg
-      class="w-5 h-5 mr-2"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-      ></path>
+  <a href="#" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8 font-medium transition">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
     Quay lại cửa hàng
   </a>
 
-  <div
-    class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100"
-  >
+  <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
       <div class="bg-gray-50 flex items-center justify-center p-8">
-        <img
-          src="{{ product.image }}"
-          alt="{{ product.name }}"
-          class="w-full h-auto object-cover rounded-xl shadow-md transform hover:scale-105 transition-transform duration-500"
-        />
+        <img src="{{ product.image }}" alt="{{ product.name }}"
+          class="w-full h-auto object-cover rounded-xl shadow-md transform hover:scale-105 transition-transform duration-500" />
       </div>
 
       <div class="p-8 md:p-12">
-        <div
-          class="uppercase tracking-wide text-sm text-blue-600 font-bold mb-2"
-        >
+        <div class="uppercase tracking-wide text-sm text-blue-600 font-bold mb-2">
           {{ product.category }}
         </div>
         <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
@@ -64,28 +44,10 @@
         </div>
 
         <div class="flex space-x-4">
-          <button
-            class="flex-1 bg-blue-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition transform hover:-translate-y-1"
-          >
-            Thêm vào giỏ hàng
-          <a href="{% url 'store:add_to_cart' product.id %}" 
-   class="w-full sm:w-auto flex-1 bg-gray-900 text-white font-bold py-4 rounded-xl text-center hover:bg-gray-800 transition block">
-    Thêm vào giỏ hàng
-</a>
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              ></path>
-            </svg>
-          </button>
+          <a href="{% url 'store:add_to_cart' product.id %}"
+            class="flex-1 text-center bg-gray-900 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-800 transition">
+            Thêm vào giỏ
+          </a>
         </div>
       </div>
     </div>

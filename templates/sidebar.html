@@ -1,0 +1,33 @@
+<aside class="w-64 bg-gray-900 text-white flex flex-col shadow-2xl z-10 h-full">
+    <div class="h-16 flex items-center justify-center border-b border-gray-800">
+      <a href="{% url 'store:dashboard_home' %}">
+        <span class="text-2xl mr-2">⚙️</span>
+        <span class="font-bold text-xl tracking-wider">O2O ADMIN</span>
+        </a>
+    </div>
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <a href="{% url 'store:dashboard_home' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if request.resolver_match.url_name == 'dashboard_home' %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📊</span> Tổng quan
+        </a>
+        <a href="{% url 'store:dashboard_product_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'product' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📦</span> Sản phẩm
+        </a>
+        <a href="{% url 'store:dashboard_order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'order' in request.path and 'dashboard' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>🛒</span> Đơn hàng
+        </a>
+        <a href="{% url 'store:dashboard_category_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'categor' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📁</span> Danh mục
+        </a>
+        <a href="{% url 'store:dashboard_coupon_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'coupon' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>🎟️</span> Mã giảm giá
+        </a>
+        <a href="{% url 'store:dashboard_store_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'store' in request.path and 'dashboard' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📍</span> Cửa hàng
+        </a>
+    </nav>
+    <div class="p-4 border-t border-gray-800">
+        <a href="{% url 'store:product_list' %}" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition">
+            <span>🔙</span> Về web khách hàng
+        </a>
+    </div>
+</aside>

@@ -1,0 +1,36 @@
+{% extends 'store/dashboard/dashboard_base.html' %}
+{% load leaflet_tags %}
+
+{% block header_title %}{{ title|default:"Cập nhật dữ liệu" }}{% endblock %}
+
+{% block extra_head %}
+    {% leaflet_css plugins="forms" %} 
+    {% leaflet_js plugins="forms" %}
+    {{ form.media }}
+    <style>
+        .leaflet-container { height: 400px !important; width: 100%; border-radius: 0.75rem; z-index: 1; border: 1px solid #e5e7eb; }
+        .leaflet-container img { max-width: none !important; }
+        .custom-django-form p { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
+        .custom-django-form label { font-weight: 600; font-size: 0.875rem; color: #374151; margin-bottom: 0.5rem; }
+        .custom-django-form input, .custom-django-form textarea, .custom-django-form select { 
+            width: 100%; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; transition: all 0.2s; background-color: #f9fafb;
+        }
+        .custom-django-form input:focus, .custom-django-form textarea:focus, .custom-django-form select:focus { 
+            outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); background-color: #ffffff;
+        }
+        .custom-django-form input[type="checkbox"] { width: auto; margin-top: 0.5rem; transform: scale(1.2); cursor: pointer; }
+    </style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <form method="POST" enctype="multipart/form-data" class="p-8">
+        {% csrf_token %}
+        <div class="custom-django-form space-y-2">{{ form.as_p }}</div>
+        <div class="flex justify-end gap-4 border-t border-gray-100 pt-6 mt-8">
+            <a href="javascript:history.back()" class="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-bold transition shadow-sm">Hủy</a>
+            <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition shadow-md">Lưu Dữ Liệu</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

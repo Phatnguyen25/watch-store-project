@@ -56,68 +56,121 @@
 />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+/>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<style>
+  /* Cứu các mảnh ghép bản đồ khỏi Tailwind */
+  #map img {
+    max-width: none !important;
+  }
+
+  /* 🌟 Cứu đường vẽ chỉ đường (SVG Path) khỏi Tailwind */
+  path.leaflet-interactive {
+    stroke: #2563eb !important;
+    stroke-width: 6px !important;
+    fill: none !important;
+  }
+
+  /* Ẩn triệt để cái bảng chữ chỉ đường mặc định của thư viện */
+  .leaflet-routing-container {
+    display: none !important;
+  }
+</style>
 <script>
-  // 1. Khởi tạo bản đồ (Mặc định ở TP.HCM)
+  // 1. Khởi tạo bản đồ
   var map = L.map("map").setView([10.7769, 106.7009], 13);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
   }).addTo(map);
 
-  var userMarker, storeMarker;
+  // Biến chứa đường đi để xóa đi vẽ lại nếu khách bấm tìm nhiều lần
+  var routingControl = null;
 
-  // 2. Hàm xử lý khi bấm nút
   function findMyLocation() {
     if (!navigator.geolocation) {
       alert("Trình duyệt của bạn không hỗ trợ định vị!");
       return;
     }
 
-    // Hiện trạng thái đang tìm...
     document.getElementById("result-box").classList.remove("hidden");
-    document.getElementById("store-name").innerText = "Đang quét...";
+    document.getElementById("store-name").innerText =
+      "Đang quét GPS và tìm đường...";
+    document.getElementById("store-distance").innerText = "...";
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        // Đánh dấu vị trí người dùng (Icon Xanh)
-        if (userMarker) map.removeLayer(userMarker);
-        userMarker = L.marker([lat, lng])
-          .addTo(map)
-          .bindPopup("Bạn đang ở đây")
-          .openPopup();
-
-        // Gọi API Backend để tìm cửa hàng
+        // Gọi API Backend tìm cửa hàng gần nhất
         fetch(`/api/find-nearest/?lat=${lat}&lng=${lng}`)
           .then((response) => response.json())
           .then((data) => {
             if (data.found) {
-              // Hiển thị kết quả text
               document.getElementById("store-name").innerText = data.name;
-              document.getElementById("store-distance").innerText =
-                data.distance_km;
 
-              // Đánh dấu cửa hàng (Icon Đỏ - Tạo icon riêng nếu muốn)
-              if (storeMarker) map.removeLayer(storeMarker);
-              storeMarker = L.marker([data.lat, data.lng])
-                .addTo(map)
-                .bindPopup(`<b>${data.name}</b><br>${data.address}`)
-                .openPopup();
+              // Xóa đường đi cũ nếu có
+              if (routingControl !== null) {
+                map.removeControl(routingControl);
+              }
 
-              // Zoom bản đồ để thấy cả 2 điểm
-              var group = new L.featureGroup([userMarker, storeMarker]);
-              map.fitBounds(group.getBounds().pad(0.1));
+              // 🚀 VẼ ĐƯỜNG ĐI MÀU XANH BẰNG ROUTING MACHINE
+              routingControl = L.Routing.control({
+                waypoints: [
+                  L.latLng(lat, lng), // Điểm A: Vị trí của bạn
+                  L.latLng(data.lat, data.lng), // Điểm B: Cửa hàng
+                ],
+                routeWhileDragging: false,
+                show: false, // Ẩn cái bảng chỉ đường text lằng nhằng
+                lineOptions: {
+                  styles: [{ color: "#2563eb", opacity: 0.9, weight: 6 }], // Màu xanh dương Tailwind
+                },
+                // Tự động cắm ghim cho 2 đầu
+                createMarker: function (i, wp, nWps) {
+                  if (i === 0) {
+                    return L.marker(wp.latLng)
+                      .bindPopup(
+                        "<b style='color:#2563eb;'>📍 Vị trí của bạn</b>",
+                      )
+                      .openPopup();
+                  } else {
+                    return L.marker(wp.latLng)
+                      .bindPopup(
+                        `<b style='color:#dc2626;'>🏪 ${data.name}</b><br>${data.address}`,
+                      )
+                      .openPopup();
+                  }
+                },
+              }).addTo(map);
+
+              // 🌟 BẮT SỰ KIỆN LẤY QUÃNG ĐƯỜNG THỰC TẾ
+              routingControl.on("routesfound", function (e) {
+                var summary = e.routes[0].summary;
+                var distanceKm = (summary.totalDistance / 1000).toFixed(1);
+                var timeMinutes = Math.round(summary.totalTime / 60);
+
+                document.getElementById("store-distance").innerHTML = `
+                      <span class="font-bold text-blue-600">${distanceKm} km</span> 
+                      (Lái xe khoảng <span class="font-bold text-red-500">${timeMinutes} phút</span>)
+                  `;
+              });
             } else {
               document.getElementById("store-name").innerText =
                 "Không tìm thấy cửa hàng nào!";
+              document.getElementById("store-distance").innerText = "-";
             }
           });
       },
-      () => {
-        alert("Không thể lấy vị trí. Vui lòng bật GPS!");
+      (error) => {
+        alert("Bạn cần cho phép trình duyệt truy cập Vị trí (Location)!");
       },
+      { enableHighAccuracy: true }, // Bật GPS độ chính xác cao
     );
   }
 </script>
-{% endblock %}
+{% endblock %} 
+

@@ -1,186 +1,45 @@
+{% extends 'store/dashboard/dashboard_base.html' %}
 {% load humanize %}
-<!doctype html>
-<html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý Sản phẩm - O2O Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-50 font-sans flex h-screen overflow-hidden">
-    <aside class="w-64 bg-gray-900 text-white flex flex-col shadow-2xl z-10">
-      <div
-        class="h-16 flex items-center justify-center border-b border-gray-800"
-      >
-        <span class="text-2xl mr-2">⚙️</span>
-        <span class="font-bold text-xl tracking-wider">O2O ADMIN</span>
-      </div>
-      <nav class="flex-1 px-4 py-6 space-y-2">
-        <a
-          href="{% url 'store:dashboard_home' %}"
-          class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-4 py-3 rounded-lg font-medium transition"
-        >
-          <span>📊</span> Tổng quan
-        </a>
 
-        <a
-          href="{% url 'store:dashboard_product_list' %}"
-          class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg font-medium transition shadow-lg"
-        >
-          <span>📦</span> Quản lý Sản phẩm
-        </a>
+{% block header_title %}Quản lý Sản phẩm{% endblock %}
 
-        <a
-          href="{% url 'store:dashboard_store_list' %}"
-          class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-4 py-3 rounded-lg font-medium transition"
-        >
-          <span>📍</span> Hệ thống Cửa hàng
-        </a>
-        <a
-          href="#"
-          class="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-4 py-3 rounded-lg font-medium transition"
-        >
-          <span>🛒</span> Đơn hàng
-        </a>
-      </nav>
-      <div class="p-4 border-t border-gray-800">
-        <a
-          href="{% url 'store:product_list' %}"
-          class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition"
-        >
-          <span>🔙</span> Về web khách hàng
-        </a>
-      </div>
-    </aside>
+{% block dashboard_content %}
+<div class="flex justify-between items-center mb-6">
+    <div class="relative w-96">
+        <input type="text" placeholder="Tìm kiếm đồng hồ..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
+        <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+    </div>
+    <a href="{% url 'store:product_create' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition flex items-center gap-2 text-sm">
+        <span>+</span> Thêm Sản Phẩm Mới
+    </a>
+</div>
 
-    <main class="flex-1 flex flex-col overflow-y-auto bg-gray-50">
-      <header
-        class="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-0"
-      >
-        <h2 class="text-xl font-bold text-gray-800">Quản lý Sản phẩm</h2>
-        <div class="flex items-center gap-4 text-sm font-medium text-gray-600">
-          <span>👋 Xin chào, Tech Lead</span>
-          <img
-            src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff"
-            class="w-8 h-8 rounded-full shadow-sm"
-          />
-        </div>
-      </header>
-
-      <div class="p-8">
-        <div class="flex justify-between items-center mb-6">
-          <div class="relative w-96">
-            <input
-              type="text"
-              placeholder="Tìm kiếm đồng hồ..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-            <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
-          </div>
-
-          <a
-            href="{% url 'store:product_create' %}"
-            class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow hover:bg-blue-700 transition flex items-center gap-2 text-sm"
-          >
-            <span>+</span> Thêm Sản Phẩm Mới
-          </a>
-        </div>
-
-        <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
-        >
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th
-                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >
-                  Mã SP
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >
-                  Thông tin sản phẩm
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >
-                  Giá bán
-                </th>
-                <th
-                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >
-                  Trạng thái
-                </th>
-                <th
-                  class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider"
-                >
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              {% for p in products %}
-              <tr class="hover:bg-gray-50 transition">
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-500"
-                >
-                  #{{ p.id }}
-                </td>
-
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mã SP</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Sản phẩm</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Giá bán</th>
+                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for p in products %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 text-sm font-bold text-gray-500">#{{ p.id }}</td>
                 <td class="px-6 py-4 flex items-center">
-                  {% if p.image %}
-                  <img
-                    src="{{ p.image.url }}"
-                    alt="{{ p.name }}"
-                    class="h-10 w-10 rounded-md object-cover border border-gray-200 mr-3"
-                  />
-                  {% else %}
-                  <div
-                    class="h-10 w-10 rounded-md bg-gray-100 border border-gray-200 mr-3 flex items-center justify-center text-xs text-gray-400"
-                  >
-                    ⌚
-                  </div>
-                  {% endif %}
-                  <div class="text-sm font-bold text-gray-900">
-                    {{ p.name }}
-                  </div>
+                    {% if p.image %}<img src="{{ p.image.url }}" class="h-10 w-10 rounded-md object-cover border mr-3" />{% else %}<div class="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center mr-3">⌚</div>{% endif %}
+                    <span class="text-sm font-bold text-gray-900">{{ p.name }}</span>
                 </td>
-
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-bold"
-                >
-                  {{ p.price|intcomma }} ₫
+                <td class="px-6 py-4 text-sm text-blue-600 font-bold">{{ p.price|intcomma }} ₫</td>
+                <td class="px-6 py-4 text-right text-sm font-medium">
+                    <a href="{% url 'store:product_update' p.pk %}" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md mr-2 hover:bg-blue-100">Sửa</a>
+                    <a href="{% url 'store:product_delete' p.pk %}" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-md hover:bg-red-100">Xóa</a>
                 </td>
-
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800"
-                  >
-                    Còn hàng
-                  </span>
-                </td>
-
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                >
-                  <a
-                    href="{% url 'store:product_update' p.pk %}"
-                    class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1.5 rounded-md mr-2 transition"
-                    >Sửa</a
-                  >
-                  <a
-                    href="{% url 'store:product_delete' p.pk %}"
-                    class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1.5 rounded-md transition"
-                    >Xóa</a
-                  >
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </main>
-  </body>
-</html>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

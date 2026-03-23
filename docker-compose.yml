@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Service 1: Database PostGIS
   db:
@@ -23,7 +21,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       - db
     environment:
@@ -35,3 +33,5 @@ services:
 
 volumes:
   postgres_data:
+    external: true
+    name: wacth-store_postgres_data

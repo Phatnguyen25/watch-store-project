@@ -94,15 +94,34 @@ Bước 2: Khởi động (Lần đầu sẽ mất ~5 phút)
 docker-compose up --build
 ```
 
-Bước 3: Tạo Database & Admin (Chỉ chạy lần đầu)
-Mở terminal mới và chạy:
+Bước 3: Quản lý Database & Tài khoản quản trị
+Mở terminal mới (hoặc tab mới) tại thư mục dự án:
 
 ```bash
-# Tạo bảng
-docker-compose exec web python manage.py migrate
+# 1. Nếu bạn vừa pull code mới có thay đổi Models, chạy lệnh sau để cập nhật (Migration):
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py migrate
 
-# Tạo tài khoản admin
-docker-compose exec web python manage.py createsuperuser
+# 2. Tạo tài khoản Admin (Quản trị viên) - Chỉ cần chạy 1 lần:
+docker compose exec web python manage.py createsuperuser
+```
+*(Lưu ý: Bạn có thể nhập Username là `admin`, nhập Email (hoặc bỏ trống), và nhập Password tùy ý. Trong lúc gõ password trên terminal sẽ không hiện dấu sao `*` để bảo mật, cứ gõ bình thường rồi Enter).*
+
+Bước 4: Nạp dữ liệu giả (Seed Data - Không bắt buộc)
+Nếu bạn muốn có sẵn dữ liệu để test giao diện mà không cần nhập tay, hãy chạy lần lượt các file seed bằng lệnh sau:
+
+```bash
+# Nạp danh mục và sản phẩm mẫu
+docker compose exec web python seed_data.py
+
+# Nạp danh sách các cửa hàng (Store Location)
+docker compose exec web python seed_stores.py
+
+# Nạp danh sách mã giảm giá ngẫu nhiên
+docker compose exec web python seed_coupons.py
+
+# Nạp dữ liệu User và các Đơn hàng ảo (Orders)
+docker compose exec web python seed_users_orders.py
 ```
 
 ### 🛠️ Công nghệ & Thư viện Chính
@@ -128,3 +147,18 @@ Xử lý: Đảm bảo file base.html nằm ở thư mục templates/ ngoài cù
 Nguyên nhân: Quên file **init**.py khi tách thư mục.
 
 Xử lý: Kiểm tra thư mục store/models/ đã có file **init**.py chưa.
+
+1. Tài khoản Quản trị viên (Admin):
+
+Tên đăng nhập: admin
+Mật khẩu: adminpass123
+2. Khách hàng 1 (User 1):
+
+Tên đăng nhập: user1
+Mật khẩu: userpass123
+Email: user1@example.com
+3. Khách hàng 2 (User 2):
+
+Tên đăng nhập: user2
+Mật khẩu: userpass123
+Email: user2@example.com

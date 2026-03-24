@@ -12,6 +12,7 @@ class Order(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    email = models.EmailField(max_length=150, blank=True, null=True, verbose_name="Email")
     full_name = models.CharField(max_length=200)
     phone = models.CharField(max_length=20)
     address = models.TextField()

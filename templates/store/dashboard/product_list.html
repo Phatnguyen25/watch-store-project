@@ -4,15 +4,28 @@
 {% block header_title %}Quản lý Sản phẩm{% endblock %}
 
 {% block dashboard_content %}
-<div class="flex justify-between items-center mb-6">
-    <div class="relative w-96">
-        <input type="text" placeholder="Tìm kiếm đồng hồ..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
-        <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+<form method="GET" class="flex justify-between items-center mb-6">
+    <div class="flex items-center space-x-2 flex-1 max-w-2xl">
+        <div class="relative flex-1">
+            <input type="text" name="q" value="{{ query }}" placeholder="Tìm kiếm đồng hồ..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
+            <button type="submit" class="absolute left-3 top-2.5 text-gray-400">🔍</button>
+        </div>
+        <select name="category_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="this.form.submit()">
+            <option value="">Tất cả danh mục</option>
+            {% for c in categories %}
+            <option value="{{ c.id }}" {% if category_id == c.id|stringformat:"i" %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="this.form.submit()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="active" {% if status == 'active' %}selected{% endif %}>Đang bán</option>
+            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Ngừng bán</option>
+        </select>
     </div>
-    <a href="{% url 'store:product_create' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition flex items-center gap-2 text-sm">
+    <a href="{% url 'store:product_create' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition flex items-center gap-2 text-sm ml-4 whitespace-nowrap">
         <span>+</span> Thêm Sản Phẩm Mới
     </a>
-</div>
+</form>
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
@@ -42,4 +55,6 @@
         </tbody>
     </table>
 </div>
+
+{% include 'store/dashboard/pagination.html' %}
 {% endblock %}

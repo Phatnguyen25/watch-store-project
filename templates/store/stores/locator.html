@@ -4,50 +4,40 @@
     📍 Tìm Cửa Hàng Gần Bạn
   </h1>
 
-  <div class="flex justify-center mb-8">
+  <div class="flex justify-between items-center mb-6">
+    <div id="loading-msg" class="hidden text-blue-600 font-bold animate-pulse text-sm">
+        Đang quét GPS và tải danh sách cửa hàng...
+    </div>
     <button
       onclick="findMyLocation()"
-      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center transition transform hover:scale-105"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition text-sm ml-auto"
     >
-      <svg
-        class="w-6 h-6 mr-2"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-        ></path>
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-        ></path>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
       </svg>
-      Tìm cửa hàng gần nhất
+      Làm mới định vị
     </button>
   </div>
 
-  <div
-    id="result-box"
-    class="hidden bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-center"
-  >
-    <p class="text-green-800 font-medium">
-      🎉 Đã tìm thấy: <span id="store-name" class="font-bold"></span>
-    </p>
-    <p class="text-sm text-green-600">
-      Cách bạn: <span id="store-distance"></span> km
-    </p>
-  </div>
 
-  <div
-    id="map"
-    class="w-full h-[500px] rounded-xl shadow-2xl border-4 border-white z-0"
-  ></div>
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- Sidebar List -->
+    <div id="sidebar" class="w-full lg:w-1/3 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden hidden" style="max-h: 600px;">
+      <div class="bg-blue-50 border-b border-blue-100 px-4 py-3 font-bold text-blue-900 flex justify-between items-center">
+        <span>🏪 Cửa hàng gần nhất</span>
+        <span id="result-count" class="bg-blue-600 text-white rounded-full px-2 py-0.5 text-xs">0</span>
+      </div>
+      <div id="store-list" class="overflow-y-auto flex-1 p-2 space-y-2">
+        <!-- Results injected here -->
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="w-full lg:flex-1">
+      <div id="map" class="w-full h-[600px] rounded-xl shadow-2xl border-4 border-white z-0"></div>
+    </div>
+  </div>
 </div>
 
 <link
@@ -81,87 +71,173 @@
   }
 </style>
 <script>
-  // 1. Khởi tạo bản đồ
-  var map = L.map("map").setView([10.7769, 106.7009], 13);
+  // 1. Khởi tạo bản đồ (Zoom out để nhìn toàn bộ VN)
+  var map = L.map("map").setView([14.0583, 108.2772], 6);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap contributors",
   }).addTo(map);
 
-  // Biến chứa đường đi để xóa đi vẽ lại nếu khách bấm tìm nhiều lần
+  // Lưu tọa độ user nếu đã định vị
+  var currentUserLat = null;
+  var currentUserLng = null;
+
+  // 2. Render tất cả các cửa hàng hiện có
+  var allMarkers = [];
+  {% for store in stores %}
+  (function() {
+      // Đề phòng Locale của Django tự biến dấu "chấm" thập phân thành dấu "phẩy"
+      var yRaw = "{{ store.location.y|default:'' }}".replace(',', '.');
+      var xRaw = "{{ store.location.x|default:'' }}".replace(',', '.');
+      
+      if (!yRaw || !xRaw || yRaw === "None") return;
+      
+      var sLat = parseFloat(yRaw);
+      var sLng = parseFloat(xRaw);
+      var sName = "{{ store.name|escapejs }}";
+      var sAddress = "{{ store.address|escapejs }}";
+      
+      if (!isNaN(sLat) && !isNaN(sLng)) {
+          var marker = L.marker([sLat, sLng])
+            .addTo(map)
+            .bindPopup("<div class='text-center'><b class='text-red-600 text-lg'>🏪 " + sName + "</b><br/><span class='text-sm text-gray-600'>" + sAddress + "</span></div>");
+            
+          marker.on('click', function() {
+              routeToStore(sLat, sLng, sName, sAddress);
+          });
+          allMarkers.push(marker);
+      }
+  })();
+  {% endfor %}
+
+  function routeToStore(endLat, endLng, storeName, storeAddress) {
+      if (currentUserLat && currentUserLng) {
+          drawRoute(currentUserLat, currentUserLng, endLat, endLng, storeName, storeAddress, null);
+      } else {
+          if (!navigator.geolocation) {
+              alert("Trình duyệt không hỗ trợ định vị!");
+              return;
+          }
+          document.getElementById("loading-msg").classList.remove("hidden");
+          document.getElementById("loading-msg").innerText = "Đang lấy vị trí của bạn để chỉ đường...";
+          navigator.geolocation.getCurrentPosition(
+              (position) => {
+                  currentUserLat = position.coords.latitude;
+                  currentUserLng = position.coords.longitude;
+                  document.getElementById("loading-msg").classList.add("hidden");
+                  drawRoute(currentUserLat, currentUserLng, endLat, endLng, storeName, storeAddress, null);
+              },
+              (error) => {
+                  document.getElementById("loading-msg").classList.add("hidden");
+                  alert("Bạn cần cho phép truy cập vị trí để xem đường đi!");
+              },
+              { enableHighAccuracy: true }
+          );
+      }
+  }
+
   var routingControl = null;
+  var userMarker = null;
+
+  function drawRoute(startLat, startLng, endLat, endLng, storeName, storeAddress, el) {
+    if (routingControl !== null) {
+      map.removeControl(routingControl);
+    }
+    
+    // Xóa marker user cũ nếu có
+    if (userMarker) {
+        map.removeLayer(userMarker);
+    }
+
+    routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(startLat, startLng),
+        L.latLng(endLat, endLng)
+      ],
+      routeWhileDragging: false,
+      show: false,
+      lineOptions: { styles: [{ color: "#2563eb", opacity: 0.9, weight: 6 }] },
+      createMarker: function (i, wp, nWps) {
+        // Chỉ tạo Marker cho vị trí User (i=0)
+        if (i === 0) {
+            return L.marker(wp.latLng).bindPopup("<b style='color:#2563eb;'>📍 Vị trí hiện tại của bạn</b>").openPopup();
+        }
+        return null; // Không tạo marker mới của Routing cho cửa hàng
+      }
+    }).addTo(map);
+
+    // Kéo góc nhìn tới khu vực cửa hàng
+    map.flyTo([endLat, endLng], 14, { duration: 1.5 });
+
+    // Tìm Marker gốc của cửa hàng và bật Popup
+    allMarkers.forEach(function(m) {
+        var pos = m.getLatLng();
+        // So sánh với dung sai nhỏ
+        if (Math.abs(pos.lat - endLat) < 0.0001 && Math.abs(pos.lng - endLng) < 0.0001) {
+            m.openPopup();
+        }
+    });
+  }
+
+  // 3. Tự động lấy vị trí khi load trang
+  window.addEventListener('load', function() {
+      findMyLocation();
+  });
 
   function findMyLocation() {
+
     if (!navigator.geolocation) {
       alert("Trình duyệt của bạn không hỗ trợ định vị!");
       return;
     }
 
-    document.getElementById("result-box").classList.remove("hidden");
-    document.getElementById("store-name").innerText =
-      "Đang quét GPS và tìm đường...";
-    document.getElementById("store-distance").innerText = "...";
+    document.getElementById("loading-msg").classList.remove("hidden");
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        
+        currentUserLat = lat;
+        currentUserLng = lng;
 
-        // Gọi API Backend tìm cửa hàng gần nhất
         fetch(`/api/find-nearest/?lat=${lat}&lng=${lng}`)
           .then((response) => response.json())
           .then((data) => {
-            if (data.found) {
-              document.getElementById("store-name").innerText = data.name;
+            document.getElementById("loading-msg").classList.add("hidden");
 
-              // Xóa đường đi cũ nếu có
-              if (routingControl !== null) {
-                map.removeControl(routingControl);
-              }
+            if (data.found && data.results.length > 0) {
+              document.getElementById("sidebar").classList.remove("hidden");
+              document.getElementById("result-count").innerText = data.results.length;
 
-              // 🚀 VẼ ĐƯỜNG ĐI MÀU XANH BẰNG ROUTING MACHINE
-              routingControl = L.Routing.control({
-                waypoints: [
-                  L.latLng(lat, lng), // Điểm A: Vị trí của bạn
-                  L.latLng(data.lat, data.lng), // Điểm B: Cửa hàng
-                ],
-                routeWhileDragging: false,
-                show: false, // Ẩn cái bảng chỉ đường text lằng nhằng
-                lineOptions: {
-                  styles: [{ color: "#2563eb", opacity: 0.9, weight: 6 }], // Màu xanh dương Tailwind
-                },
-                // Tự động cắm ghim cho 2 đầu
-                createMarker: function (i, wp, nWps) {
-                  if (i === 0) {
-                    return L.marker(wp.latLng)
-                      .bindPopup(
-                        "<b style='color:#2563eb;'>📍 Vị trí của bạn</b>",
-                      )
-                      .openPopup();
-                  } else {
-                    return L.marker(wp.latLng)
-                      .bindPopup(
-                        `<b style='color:#dc2626;'>🏪 ${data.name}</b><br>${data.address}`,
-                      )
-                      .openPopup();
-                  }
-                },
-              }).addTo(map);
+              const listEl = document.getElementById("store-list");
+              listEl.innerHTML = "";
 
-              // 🌟 BẮT SỰ KIỆN LẤY QUÃNG ĐƯỜNG THỰC TẾ
-              routingControl.on("routesfound", function (e) {
-                var summary = e.routes[0].summary;
-                var distanceKm = (summary.totalDistance / 1000).toFixed(1);
-                var timeMinutes = Math.round(summary.totalTime / 60);
-
-                document.getElementById("store-distance").innerHTML = `
-                      <span class="font-bold text-blue-600">${distanceKm} km</span> 
-                      (Lái xe khoảng <span class="font-bold text-red-500">${timeMinutes} phút</span>)
-                  `;
+              data.results.forEach((store, index) => {
+                 let isActive = index === 0 ? "bg-blue-50 border-blue-200 ring-2 ring-blue-500" : "bg-white hover:bg-gray-50 border-gray-100";
+                 let escName = store.name.replace(/'/g, "\\'");
+                 let escAddress = store.address.replace(/'/g, "\\'");
+                 
+                 let html = `
+                    <div class="p-4 border rounded-lg cursor-pointer transition ${isActive}" onclick="drawRoute(${lat}, ${lng}, ${store.lat}, ${store.lng}, '${escName}', '${escAddress}', this)">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-gray-900 line-clamp-1 flex-1 pr-2">${store.name}</h3>
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">${store.distance_km} km</span>
+                        </div>
+                        <p class="text-xs text-gray-500 line-clamp-2 mb-2">${store.address}</p>
+                        <div class="text-xs text-blue-600 font-medium">
+                           🚗 Lái xe ~ ${store.time_minutes} phút
+                        </div>
+                    </div>
+                 `;
+                 listEl.innerHTML += html;
               });
+
+              // Vẽ đường cho thằng đầu tiên
+              let closest = data.results[0];
+              drawRoute(lat, lng, closest.lat, closest.lng, closest.name, closest.address, null);
+              
             } else {
-              document.getElementById("store-name").innerText =
-                "Không tìm thấy cửa hàng nào!";
-              document.getElementById("store-distance").innerText = "-";
+              alert("Không tìm thấy dữ liệu cửa hàng nào ở gần bạn!");
             }
           });
       },

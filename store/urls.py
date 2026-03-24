@@ -1,7 +1,7 @@
 from django.urls import path
 
 # NHÌN KỸ DÒNG NÀY: Phải import đích danh cart_views
-from .views import product_views, store_views, dashboard_views, cart_views, order_views 
+from .views import product_views, store_views, dashboard_views, cart_views, order_views, auth_views 
 
 app_name = 'store'
 urlpatterns = [
@@ -9,8 +9,15 @@ urlpatterns = [
     path('dashboard/', dashboard_views.dashboard_home, name='dashboard_home'),
     path('dashboard/products/', dashboard_views.dashboard_product_list, name='dashboard_product_list'),
     
+    # --- AUTHENTICATION ---
+    path('login/', auth_views.login_view, name='login'),
+    path('register/', auth_views.register_view, name='register'),
+    path('logout/', auth_views.logout_view, name='logout'),
+    
     # --- TRANG CHỦ & SẢN PHẨM ---
-    path('', product_views.product_list, name='product_list'),          
+    path('', product_views.product_list, name='product_list'),
+    path('products/', product_views.all_products, name='all_products'),
+    path('category/<slug:slug>/', product_views.category_products, name='category_products'),
     path('product/<int:pk>/', product_views.product_detail, name='product_detail'),
     path('dashboard/stores/', dashboard_views.dashboard_store_list, name='dashboard_store_list'),
     path('dashboard/products/add/', dashboard_views.product_create, name='product_create'),

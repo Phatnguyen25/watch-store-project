@@ -3,6 +3,11 @@ from django.http import JsonResponse
 from store.models import Product, Coupon
 from store.models.order import Order, OrderItem
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
 
 def get_cart_data(request):
     """Hàm bổ trợ: Tính toán dữ liệu giỏ hàng từ Session"""
@@ -98,6 +103,7 @@ def apply_coupon(request):
     except Coupon.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Mã giảm giá không hợp lệ!'})
 
+@login_required(login_url='store:login')
 def checkout(request):
     cart = request.session.get('cart', {})
     if not cart:
@@ -110,10 +116,11 @@ def checkout(request):
         phone = request.POST.get('phone')
         address = request.POST.get('address')
         
-        user = request.user if request.user.is_authenticated else None
+        user = request.user
         
         order = Order.objects.create(
             user=user,
+            email=user.email,
             full_name=full_name,
             phone=phone,
             address=address,
@@ -132,6 +139,26 @@ def checkout(request):
             
         request.session['cart'] = {}
         request.session.modified = True
+        
+        # Gửi email hóa đơn
+        try:
+            html_content = render_to_string('store/email/invoice.html', {
+                'order': order,
+                'cart_items': cart_items,
+                'cart_total': cart_total
+            })
+            text_content = strip_tags(html_content)
+            
+            msg = EmailMultiAlternatives(
+                f"Hóa đơn đặt hàng #{order.id} - Watch Store O2O",
+                text_content,
+                settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@watchstore.com',
+                [order.email]
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=True)
+        except Exception as e:
+            print("Lỗi khi gửi email:", e)
         
         return redirect('store:order_detail', order_id=order.id)
 

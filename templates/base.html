@@ -31,43 +31,43 @@
               >
             </a>
 
-            <div class="hidden md:ml-8 md:flex md:space-x-6">
+            <div class="hidden md:ml-4 lg:ml-8 md:flex md:space-x-2 lg:space-x-6">
               <a
                 href="{% url 'store:product_list' %}"
-                class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
+                class="text-gray-600 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-md md:text-sm lg:text-base font-medium transition whitespace-nowrap"
                 >Trang chủ</a
               >
               <a
-                href="{% url 'store:product_list' %}"
-                class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
+                href="{% url 'store:all_products' %}"
+                class="text-gray-600 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-md md:text-sm lg:text-base font-medium transition whitespace-nowrap"
                 >Sản phẩm</a
               >
               {% if user.is_authenticated %}
               <a
                 href="{% url 'store:order_list' %}"
-                class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
+                class="text-gray-600 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-md md:text-sm lg:text-base font-medium transition whitespace-nowrap"
                 >Lịch sử đơn hàng</a
               >
               {% endif %}
               <a
                 href="{% url 'store:store_locator' %}"
-                class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition"
+                class="text-gray-600 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-md md:text-sm lg:text-base font-medium transition whitespace-nowrap"
                 >📍 Tìm cửa hàng</a
               >
             </div>
           </div>
 
-          <div class="flex items-center space-x-2 sm:space-x-4">
+          <div class="flex items-center space-x-2 lg:space-x-4">
             {% if user.is_authenticated %}
 
             <div
-              class="hidden sm:flex items-center gap-2 border-r border-gray-200 pr-4"
+              class="hidden sm:flex items-center gap-1 lg:gap-2 border-r border-gray-200 pr-2 lg:pr-4 whitespace-nowrap"
             >
               <span class="text-sm font-medium text-gray-600"
                 >Chào,
                 <strong class="text-gray-900">{{ user.username }}</strong></span
               >
-              <form method="post" action="/admin/logout/?next=/" class="inline">
+              <form method="post" action="{% url 'store:logout' %}" class="inline">
                 {% csrf_token %}
                 <button
                   type="submit"
@@ -81,27 +81,34 @@
             {% if user.is_staff %}
             <a
               href="{% url 'store:dashboard_home' %}"
-              class="bg-gray-800 text-white hover:bg-black px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 shadow-sm"
+              class="bg-gray-800 text-white hover:bg-black px-2 lg:px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-1 shadow-sm whitespace-nowrap"
             >
               💻 <span class="hidden md:inline">Quản Trị</span>
             </a>
-            {% endif %} {% else %}
+            {% endif %}
 
+            {% else %}
+            
             <a
-              href="/admin/login/?next=/"
-              class="text-gray-600 hover:text-blue-600 text-sm font-bold px-3 py-2 transition"
+              href="{% url 'store:login' %}"
+              class="text-gray-600 hover:text-blue-600 text-sm font-bold px-2 lg:px-3 py-2 transition whitespace-nowrap"
             >
               Đăng nhập
+            </a>
+            <a
+              href="{% url 'store:register' %}"
+              class="bg-gray-100 text-gray-800 hover:bg-gray-200 text-sm font-bold px-3 lg:px-4 py-2 rounded-lg transition whitespace-nowrap"
+            >
+              Đăng ký
             </a>
 
             {% endif %}
 
             <a
               href="{% url 'store:cart_detail' %}"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center shadow-sm"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-lg font-medium transition flex items-center shadow-sm whitespace-nowrap"
             >
-              🛒
-              <span class="hidden md:inline ml-2"
+              🛒 <span class="hidden lg:inline ml-2"
                 >Giỏ hàng ({{ cart_count|default:0 }})</span
               >
             </a>

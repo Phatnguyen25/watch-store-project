@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
+from django.db.models import Q
 from store.models import Product, Store, Category, Coupon
 from store.models.order import Order
 from store.forms import ProductForm, StoreForm, CategoryForm, CouponForm, OrderForm
@@ -21,24 +23,138 @@ def dashboard_home(request):
     return render(request, 'store/dashboard/index.html', context)
 
 def dashboard_product_list(request):
-    products = Product.objects.all().order_by('-id')
-    return render(request, 'store/dashboard/product_list.html', {'products': products})
+    query = request.GET.get('q', '')
+    category_id = request.GET.get('category_id', '')
+    status = request.GET.get('status', '') # Thêm filter is_active
+    
+    products_list = Product.objects.all().order_by('-id')
+    categories = Category.objects.all() # Gửi danh sách Category ra UI
+
+    if query:
+        products_list = products_list.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        )
+        
+    if category_id:
+        products_list = products_list.filter(category_id=category_id)
+        
+    if status == 'active':
+        products_list = products_list.filter(is_active=True)
+    elif status == 'inactive':
+        products_list = products_list.filter(is_active=False)
+
+    paginator = Paginator(products_list, 20)
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
+
+    context = {
+        'products': products,
+        'query': query,
+        'category_id': category_id,
+        'status': status,
+        'categories': categories,
+    }
+    return render(request, 'store/dashboard/product_list.html', context)
 
 def dashboard_store_list(request):
-    stores = Store.objects.all().order_by('-id')
-    return render(request, 'store/dashboard/store_list.html', {'stores': stores})
+    query = request.GET.get('q', '')
+    status = request.GET.get('status', '') # Lọc theo hoạt động
+    
+    stores_list = Store.objects.all().order_by('name')
+
+    if query:
+        stores_list = stores_list.filter(
+            Q(name__icontains=query) | Q(address__icontains=query)
+        )
+        
+    if status == 'active':
+        stores_list = stores_list.filter(is_active=True)
+    elif status == 'inactive':
+        stores_list = stores_list.filter(is_active=False)
+
+    paginator = Paginator(stores_list, 20)
+    page_number = request.GET.get('page')
+    stores = paginator.get_page(page_number)
+
+    context = {
+        'stores': stores,
+        'query': query,
+        'status': status,
+    }
+    return render(request, 'store/dashboard/store_list.html', context)
 
 def dashboard_category_list(request):
-    categories = Category.objects.all().order_by('-id')
-    return render(request, 'store/dashboard/category_list.html', {'categories': categories})
+    query = request.GET.get('q', '')
+    status = request.GET.get('status', '') # Lọc active
+    
+    categories_list = Category.objects.all().order_by('name')
+
+    if query:
+        categories_list = categories_list.filter(name__icontains=query)
+        
+    if status == 'active':
+        categories_list = categories_list.filter(active=True)
+    elif status == 'inactive':
+        categories_list = categories_list.filter(active=False)
+
+    paginator = Paginator(categories_list, 20)
+    page_number = request.GET.get('page')
+    categories = paginator.get_page(page_number)
+
+    context = {
+        'categories': categories,
+        'query': query,
+        'status': status,
+    }
+    return render(request, 'store/dashboard/category_list.html', context)
 
 def dashboard_coupon_list(request):
-    coupons = Coupon.objects.all().order_by('-id')
-    return render(request, 'store/dashboard/coupon_list.html', {'coupons': coupons})
+    query = request.GET.get('q', '')
+    status = request.GET.get('status', '') # Lọc active
+    
+    coupons_list = Coupon.objects.all().order_by('-valid_to')
+
+    if query:
+        coupons_list = coupons_list.filter(code__icontains=query)
+        
+    if status == 'active':
+        coupons_list = coupons_list.filter(active=True)
+    elif status == 'inactive':
+        coupons_list = coupons_list.filter(active=False)
+
+    paginator = Paginator(coupons_list, 20)
+    page_number = request.GET.get('page')
+    coupons = paginator.get_page(page_number)
+
+    context = {
+        'coupons': coupons,
+        'query': query,
+        'status': status,
+    }
+    return render(request, 'store/dashboard/coupon_list.html', context)
 
 def dashboard_order_list(request):
+    q = request.GET.get('q', '')
+    status = request.GET.get('status', '')
+    
     orders = Order.objects.all().order_by('-created_at')
-    return render(request, 'store/dashboard/order_list.html', {'orders': orders})
+    if q:
+        orders = orders.filter(Q(full_name__icontains=q) | Q(phone__icontains=q) | Q(id__icontains=q))
+    if status:
+        orders = orders.filter(status=status)
+        
+    paginator = Paginator(orders, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'store/dashboard/order_list.html', {
+        'orders': page_obj.object_list,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'is_paginated': page_obj.has_other_pages(),
+        'q': q,
+        'status': status
+    })
 
 def dashboard_order_update(request, pk):
     order = get_object_or_404(Order, pk=pk)

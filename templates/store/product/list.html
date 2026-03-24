@@ -88,58 +88,24 @@
       Khám Phá Theo Danh Mục
     </h2>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% for cat in categories %}
       <a
-        href="#"
+        href="{% url 'store:category_products' cat.slug %}"
         class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
       >
         <img
-          src="https://images.unsplash.com/photo-1622434641406-a158123450f9?auto=format&fit=crop&w=500&q=80"
+          src="https://placehold.co/500x300/111827/ffffff?text={{ cat.name|urlencode }}&font=roboto"
           class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
+          alt="{{ cat.name }}"
         />
         <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >ĐỒNG HỒ NAM</span
+          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10 text-center px-2"
+          >{{ cat.name|upper }}</span
         >
       </a>
-      <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1508656961554-47b2c5890c9b?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
-        <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >ĐỒNG HỒ NỮ</span
-        >
-      </a>
-      <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1548171915-e76a3e1eb520?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
-        <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >MÁY CƠ (AUTO)</span
-        >
-      </a>
-      <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
-        <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >SMARTWATCH</span
-        >
-      </a>
+      {% empty %}
+      <p class="text-gray-500 col-span-full">Chưa có danh mục nào hiển thị.</p>
+      {% endfor %}
     </div>
   </div>
 </div>

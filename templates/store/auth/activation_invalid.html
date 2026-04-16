@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Kích Hoạt Thất Bại - Watch Store O2O{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-10 text-center transform transition-all">
+    
+    <div class="w-24 h-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-red-50">
+      <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    </div>
+    
+    <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">Liên Kết Hỏng! ⚠️</h2>
+    <p class="text-gray-600 mb-8 leading-relaxed">Đường dẫn xác thực này đã hết hạn sử dụng, không hợp lệ, hoặc tài khoản của bạn đã được kích hoạt từ trước rồi.</p>
+    
+    <div class="flex flex-col gap-3">
+      <a href="{% url 'store:login' %}" class="inline-block bg-gray-900 hover:bg-black text-white font-bold py-3 px-8 rounded-xl shadow-lg transition w-full">
+        Thử Đăng Nhập Lại
+      </a>
+      <a href="{% url 'store:register' %}" class="inline-block bg-white text-gray-700 hover:bg-gray-50 font-bold py-3 px-8 rounded-xl shadow-sm border border-gray-200 transition w-full">
+        Đăng Ký Tài Khoản Mới
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

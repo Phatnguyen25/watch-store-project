@@ -1,0 +1,23 @@
+{% autoescape off %}
+<div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #1e3a8a; padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">Xác Thực Tài Khoản O2O</h1>
+    </div>
+    <div style="padding: 30px; background-color: #f9fafb;">
+        <p style="font-size: 16px; color: #374151;">Xin chào <strong>{{ user.username }}</strong>,</p>
+        <p style="font-size: 16px; color: #374151; line-height: 1.5;">Cảm ơn bạn đã đăng ký tài khoản tại Watch Store O2O. Để bắt đầu đặt hàng và sử dụng các tính năng cá nhân hóa, vui lòng kích hoạt tài khoản của bạn bằng cách nhấn vào nút dưới đây:</p>
+        
+        <div style="text-align: center; margin: 35px 0;">
+            <a href="http://{{ domain }}{% url 'store:activate' uidb64=uid token=token %}" style="background-color: #2563eb; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+                Kích Hoạt Tài Khoản Ngay
+            </a>
+        </div>
+        
+        <p style="font-size: 14px; color: #6b7280; line-height: 1.5; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+            Nếu nút bấm không hoạt động, bạn có thể copy đường dẫn sau và dán vào trình duyệt:<br/>
+            <span style="color: #2563eb; word-break: break-all;">http://{{ domain }}{% url 'store:activate' uidb64=uid token=token %}</span>
+        </p>
+        <p style="font-size: 14px; color: #6b7280; font-style: italic;">Phát hiện đăng ký nghi ngờ? Bạn có thể bỏ qua email này một cách an toàn.</p>
+    </div>
+</div>
+{% endautoescape %}

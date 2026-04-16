@@ -24,6 +24,12 @@
         <a href="{% url 'store:dashboard_store_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'store' in request.path and 'dashboard' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>📍</span> Cửa hàng
         </a>
+        <a href="{% url 'store:dashboard_report' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'report' in request.path %}bg-blue-600 text-white shadow-lg text-white font-bold{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📈</span> Báo cáo Doanh thu
+        </a>
+        <a href="{% url 'store:dashboard_user_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'users' in request.path %}bg-blue-600 text-white shadow-lg text-white font-bold{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>👥</span> Người dùng
+        </a>
     </nav>
     <div class="p-4 border-t border-gray-800">
         <a href="{% url 'store:product_list' %}" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition">

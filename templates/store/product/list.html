@@ -48,36 +48,69 @@
   </div>
 </div>
 
-<div class="bg-white py-12 border-b border-gray-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
-      <div
-        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
-      >
-        <span class="text-4xl mb-4">📱</span>
-        <h3 class="text-lg font-bold text-gray-900">1. Đặt hàng Online</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          Giao diện trực quan, thông tin minh bạch.
+<div class="bg-white py-16 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div
+      class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4"
+    >
+      <div>
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center">
+          <span class="text-yellow-500 mr-3 text-4xl">🔥</span> Sản Phẩm Bán Chạy
+        </h2>
+        <p class="text-gray-500 mt-2 font-medium">
+          Các tuyệt tác đồng hồ được giới tinh hoa săn lùng nhiều nhất hiện nay.
         </p>
       </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {% for p in best_sellers %}
       <div
-        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
+        class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-yellow-200 overflow-hidden group flex flex-col relative"
       >
-        <span class="text-4xl mb-4">🗺️</span>
-        <h3 class="text-lg font-bold text-gray-900">2. Thuật toán PostGIS</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          Định vị thông minh cửa hàng gần bạn nhất.
-        </p>
+        <div class="absolute top-0 right-0 w-16 h-16 overflow-hidden z-20">
+           <div class="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-black py-1 shadow-lg w-[200%] text-center transform rotate-45 translate-x-3 translate-y-3">BEST</div>
+        </div>
+        <a
+          href="{% url 'store:product_detail' p.pk %}"
+          class="relative h-72 overflow-hidden bg-gray-50 block"
+        >
+          {% if p.image %}
+          <img
+            src="{{ p.image.url }}"
+            alt="{{ p.name }}"
+            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+          />
+          {% else %}
+          <div
+            class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200 text-5xl"
+          >
+            ⌚
+          </div>
+          {% endif %}
+        </a>
+        <div class="p-5 flex-grow flex flex-col justify-between">
+          <h3
+            class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight hover:text-blue-600 transition"
+          >
+            <a href="{% url 'store:product_detail' p.pk %}">{{ p.name }}</a>
+          </h3>
+          <div class="mt-4">
+            <p class="text-xl font-black text-red-600 mb-4">
+              {{ p.price|intcomma }} ₫
+            </p>
+            <div class="flex space-x-2">
+              <a
+                href="{% url 'store:add_to_cart' p.pk %}"
+                class="flex-1 text-center bg-gray-900 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-black shadow-md transition"
+              >
+                Trải nghiệm
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
-      <div
-        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
-      >
-        <span class="text-4xl mb-4">🏪</span>
-        <h3 class="text-lg font-bold text-gray-900">3. Trải nghiệm Offline</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          Nhận hàng và bảo hành tại điểm O2O.
-        </p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </div>
@@ -91,15 +124,20 @@
       {% for cat in categories %}
       <a
         href="{% url 'store:category_products' cat.slug %}"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
+        class="relative rounded-2xl overflow-hidden group h-32 md:h-40 flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
       >
-        <img
-          src="https://placehold.co/500x300/111827/ffffff?text={{ cat.name|urlencode }}&font=roboto"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-          alt="{{ cat.name }}"
-        />
+        <!-- Nền dải màu Gradient lộng lẫy luân phiên từng danh mục -->
+        <div class="absolute inset-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500 z-0 bg-gradient-to-br {% cycle 'from-slate-800 to-gray-900' 'from-blue-900 to-indigo-900' 'from-emerald-900 to-teal-900' 'from-rose-900 to-red-900' 'from-purple-900 to-fuchsia-900' 'from-amber-900 to-orange-900' 'from-cyan-900 to-blue-900' 'from-stone-800 to-neutral-900' %}"></div>
+        
+        <!-- Họa tiết Kính (Glassmorphism) -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-white/10 z-10"></div>
+        
+        <!-- Hiệu ứng viền sáng mờ khi Hover -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 border-2 border-white/20 rounded-2xl transition-opacity duration-500 z-20 scale-95 group-hover:scale-100"></div>
+
+        <!-- Tiêu đề Danh Mục -->
         <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10 text-center px-2"
+          class="relative text-white font-extrabold text-xl md:text-2xl tracking-[0.2em] z-30 text-center px-4 drop-shadow-xl group-hover:scale-110 transition-transform duration-500"
           >{{ cat.name|upper }}</span
         >
       </a>

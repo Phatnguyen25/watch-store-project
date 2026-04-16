@@ -20,6 +20,7 @@ class Product(models.Model):
     # SỨC MẠNH CỦA JSON: Lưu trữ linh hoạt (Máy, Kính, Chống nước...)
     specs = models.JSONField(default=dict, blank=True, verbose_name="Thông số kỹ thuật")
     is_active = models.BooleanField(default=True, verbose_name="Hiển thị")
+    stock = models.IntegerField(default=0, verbose_name="Số lượng tồn kho")
     
     class Meta:
         verbose_name = "Sản phẩm"

@@ -10,40 +10,68 @@ from django.utils.html import strip_tags
 from django.conf import settings
 
 def get_cart_data(request):
-    """Hàm bổ trợ: Tính toán dữ liệu giỏ hàng từ Session"""
-    cart = request.session.get('cart', {})
+    """Hàm bổ trợ: Tính toán dữ liệu giỏ hàng từ Session hoặc Database"""
     cart_items = []
     cart_total = 0
 
-    for product_id_str, quantity in cart.items():
-        try:
-            product = Product.objects.get(id=int(product_id_str))
-            total_price = product.price * quantity
+    if request.user.is_authenticated:
+        from store.models import CartItem
+        db_items = CartItem.objects.filter(user=request.user).select_related('product')
+        for item in db_items:
+            total_price = item.product.price * item.quantity
             cart_total += total_price
-            
             cart_items.append({
-                'product_id': product.id,
-                'name': product.name,
-                'price': product.price,
-                'quantity': quantity,
+                'item_id': item.product.id, # Khớp với Template
+                'product_id': item.product.id,
+                'name': item.product.name,
+                'price': item.product.price,
+                'quantity': item.quantity,
                 'total': total_price,
-                'image': product.image.url if product.image else None,
+                'image': item.product.image.url if item.product.image else None,
             })
-        except Product.DoesNotExist:
-            continue
+    else:
+        cart = request.session.get('cart', {})
+        for product_id_str, quantity in cart.items():
+            try:
+                product = Product.objects.get(id=int(product_id_str))
+                total_price = product.price * quantity
+                cart_total += total_price
+                
+                cart_items.append({
+                    'item_id': product.id,
+                    'product_id': product.id,
+                    'name': product.name,
+                    'price': product.price,
+                    'quantity': quantity,
+                    'total': total_price,
+                    'image': product.image.url if product.image else None,
+                })
+            except Product.DoesNotExist:
+                continue
             
     # Lưu tổng tiền vào session để các hàm khác (như apply_coupon) sử dụng
     request.session['cart_total'] = float(cart_total)
     return cart_items, cart_total
 
 def add_to_cart(request, product_id):
-    cart = request.session.get('cart', {})
-    product_id_str = str(product_id)
-
-    cart[product_id_str] = cart.get(product_id_str, 0) + 1
-    
-    request.session['cart'] = cart
-    request.session.modified = True
+    if request.user.is_authenticated:
+        from store.models import CartItem, Product
+        product = get_object_or_404(Product, id=product_id)
+        cart_item, created = CartItem.objects.get_or_create(
+            user=request.user,
+            product=product,
+            defaults={'quantity': 1}
+        )
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+    else:
+        cart = request.session.get('cart', {})
+        product_id_str = str(product_id)
+        cart[product_id_str] = cart.get(product_id_str, 0) + 1
+        request.session['cart'] = cart
+        request.session.modified = True
+        
     return redirect('store:cart_detail')
 
 def cart_detail(request):
@@ -54,29 +82,50 @@ def cart_detail(request):
     })
 
 def update_cart(request, item_id, action):
-    cart = request.session.get('cart', {})
-    item_id_str = str(item_id)
-    
-    if item_id_str in cart:
-        if action == 'increase':
-            cart[item_id_str] += 1
-        elif action == 'decrease':
-            cart[item_id_str] -= 1
-            if cart[item_id_str] <= 0:
-                del cart[item_id_str]
+    if request.user.is_authenticated:
+        from store.models import CartItem
+        try:
+            cart_item = CartItem.objects.get(user=request.user, product_id=item_id)
+            if action == 'increase':
+                cart_item.quantity += 1
+                cart_item.save()
+            elif action == 'decrease':
+                cart_item.quantity -= 1
+                if cart_item.quantity <= 0:
+                    cart_item.delete()
+                else:
+                    cart_item.save()
+        except CartItem.DoesNotExist:
+            pass
+    else:
+        cart = request.session.get('cart', {})
+        item_id_str = str(item_id)
         
-        request.session['cart'] = cart
-        request.session.modified = True
-        
+        if item_id_str in cart:
+            if action == 'increase':
+                cart[item_id_str] += 1
+            elif action == 'decrease':
+                cart[item_id_str] -= 1
+                if cart[item_id_str] <= 0:
+                    del cart[item_id_str]
+            
+            request.session['cart'] = cart
+            request.session.modified = True
+            
     return redirect('store:cart_detail')
 
 def remove_from_cart(request, item_id):
-    cart = request.session.get('cart', {})
-    item_id_str = str(item_id)
-    if item_id_str in cart:
-        del cart[item_id_str]
-        request.session['cart'] = cart
-        request.session.modified = True
+    if request.user.is_authenticated:
+        from store.models import CartItem
+        CartItem.objects.filter(user=request.user, product_id=item_id).delete()
+    else:
+        cart = request.session.get('cart', {})
+        item_id_str = str(item_id)
+        if item_id_str in cart:
+            del cart[item_id_str]
+            request.session['cart'] = cart
+            request.session.modified = True
+            
     return redirect('store:cart_detail')
 
 # --- LOGIC MÃ GIẢM GIÁ (MỚI) ---
@@ -105,11 +154,11 @@ def apply_coupon(request):
 
 @login_required(login_url='store:login')
 def checkout(request):
-    cart = request.session.get('cart', {})
-    if not cart:
-        return redirect('store:product_list')
-
     cart_items, cart_total = get_cart_data(request)
+    
+    if not cart_items:
+        # Nếu không có sản phẩm nào trong giỏ (từ DB hoặc session), quay về trang chủ
+        return redirect('store:product_list')
 
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
@@ -128,6 +177,7 @@ def checkout(request):
             status='Pending'
         )
         
+        from django.db.models import F
         for item in cart_items:
             product = Product.objects.get(id=item['product_id'])
             OrderItem.objects.create(
@@ -137,8 +187,16 @@ def checkout(request):
                 quantity=item['quantity']
             )
             
-        request.session['cart'] = {}
-        request.session.modified = True
+            # Khắc phục lỗi: Trừ số lượng tồn kho an toàn
+            Product.objects.filter(id=product.id).update(stock=F('stock') - item['quantity'])
+            
+        # Clean Cart Session / Database
+        if request.user.is_authenticated:
+            from store.models import CartItem
+            CartItem.objects.filter(user=request.user).delete()
+        else:
+            request.session['cart'] = {}
+            request.session.modified = True
         
         # Gửi email hóa đơn
         try:
@@ -160,7 +218,8 @@ def checkout(request):
         except Exception as e:
             print("Lỗi khi gửi email:", e)
         
-        return redirect('store:order_detail', order_id=order.id)
+        # MÔ PHỎNG: Redirect sang Cổng VNPAY / MoMo thay vì Success
+        return redirect('store:payment_create', order_id=order.id)
 
     return render(request, 'store/cart/checkout.html', {
         'cart_items': cart_items,
@@ -169,3 +228,35 @@ def checkout(request):
 
 def checkout_success(request):
     return render(request, 'store/cart/checkout_success.html')
+
+# --- MÔ PHỎNG CỔNG THANH TOÁN (VNPAY / MOMO) ---
+def payment_create(request, order_id):
+    """
+    Giả lập trang xử lý Hash Code trước khi nhảy sang cổng thanh toán.
+    """
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Tại đây, hệ thống thực thụ sẽ chạy thư viện tạo vnp_HashMac
+    # Ở đây ta sẽ giả lập UI Redirect.
+    context = {
+        'order': order,
+        'vnp_return_url': f'/payment/return/?vnp_ResponseCode=00&vnp_TxnRef={order.id}'
+    }
+    return render(request, 'store/cart/payment_mock.html', context)
+
+def payment_return(request):
+    """
+    Giả lập IPN / Return URL để hứng kết quả từ VNPAY.
+    """
+    vnp_ResponseCode = request.GET.get('vnp_ResponseCode')
+    vnp_TxnRef = request.GET.get('vnp_TxnRef')
+    
+    if vnp_ResponseCode == '00':
+        from store.models.order import Order
+        order = get_object_or_404(Order, id=vnp_TxnRef)
+        order.status = 'Processing' # Đã thanh toán
+        order.save()
+        
+        return redirect('store:checkout_success')
+        
+    return redirect('store:cart_detail')

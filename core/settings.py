@@ -154,15 +154,11 @@ if os.name == 'nt':
 # CẤU HÌNH GỬI EMAIL THỰC TẾ
 # ==========================================
 # Kiểm tra nếu chưa cấu hình EMAIL_HOST_USER thì dùng giao diện Console để test tránh lỗi
-if os.environ.get('EMAIL_HOST_USER'):
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-else:
-    # Nếu chạy local/docker chưa có biến môi trường thì in luôn ra Terminal
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    DEFAULT_FROM_EMAIL = 'noreply@watchstore.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'anhemtaothieunang@gmail.com')
+# App Password loại bỏ khoảng trắng
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'kuuuyeyihdyymwar')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

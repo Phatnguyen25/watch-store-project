@@ -167,10 +167,116 @@ def dashboard_order_update(request, pk):
         form = OrderForm(instance=order)
     return render(request, 'store/dashboard/general_form.html', {'form': form, 'title': f'Sửa Đơn Hàng #{order.id}'})
 
+def export_orders_excel(request):
+    """Xuất danh sách đơn hàng ra file Excel"""
+    orders = Order.objects.all().order_by('-created_at')
+    
+    # Tạo tiêu đề cột
+    data = [
+        ['Mã Đơn', 'Khách hàng', 'Email', 'SĐT', 'Địa chỉ', 'Tổng Tiền (VNĐ)', 'Trạng Thái', 'Ngày Đặt']
+    ]
+    
+    for o in orders:
+        data.append([
+            o.id,
+            o.full_name,
+            o.email,
+            o.phone,
+            o.address,
+            o.total_price,
+            o.get_status_display(),
+            o.created_at.strftime('%d/%m/%Y %H:%M:%S') if o.created_at else ''
+        ])
+        
+    import django_excel as excel
+    return excel.make_response_from_array(data, "xlsx", file_name="danh_sach_don_hang")
+
 
 # ==========================================
 # 1. QUẢN LÝ SẢN PHẨM (PRODUCT CRUD)
 # ==========================================
+import django_excel as excel
+
+def export_products_excel(request):
+    products = Product.objects.all().order_by('id')
+    
+    # Tạo tiêu đề cột
+    data = [
+        ['ID', 'Tên sản phẩm', 'ID Danh mục', 'Giá', 'Tồn kho', 'Hiển thị']
+    ]
+    
+    # Nạp dữ liệu
+    for p in products:
+        data.append([
+            p.id,
+            p.name,
+            p.category_id if p.category_id else '',
+            p.price,
+            p.stock,
+            "Có" if p.is_active else "Không"
+        ])
+        
+    # Trả về file excel
+    return excel.make_response_from_array(data, "xlsx", file_name="danh_sach_san_pham")
+
+def import_products_excel(request):
+    if request.method == "POST":
+        excel_file = request.FILES.get("excel_file")
+        if not excel_file:
+            return redirect('store:dashboard_product_list')
+            
+        try:
+            # Lấy dữ liệu dạng mảng dòng
+            data = excel_file.get_array()
+            
+            # Bỏ qua dòng tiêu đề (index 0)
+            for row in data[1:]:
+                if not row or len(row) < 6:
+                    continue
+                    
+                pid = row[0]
+                name = str(row[1]).strip()
+                cat_id = row[2]
+                price = row[3]
+                stock = row[4]
+                is_active_str = str(row[5]).strip()
+                
+                is_active = (is_active_str == "Có")
+                
+                # Làm sạch dữ liệu rỗng
+                if cat_id == '':
+                    cat_id = None
+                
+                if not name:
+                    continue
+                    
+                # Nếu có ID -> Cập nhật (Update)
+                if pid:
+                    try:
+                        p = Product.objects.get(id=int(pid))
+                        p.name = name
+                        p.category_id = cat_id
+                        p.price = price
+                        p.stock = stock
+                        p.is_active = is_active
+                        p.save()
+                    except (Product.DoesNotExist, ValueError):
+                        pass
+                # Nếu không có ID -> Tạo mới (Create)
+                else:
+                    Product.objects.create(
+                        name=name,
+                        category_id=cat_id,
+                        price=price,
+                        stock=stock,
+                        is_active=is_active
+                    )
+        except Exception as e:
+            # Nếu có lỗi (ví dụ file sai format)
+            pass
+            
+    return redirect('store:dashboard_product_list')
+
 def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
@@ -294,3 +400,163 @@ def coupon_delete(request, pk):
         coupon.delete()
         return redirect('store:dashboard_coupon_list')
     return render(request, 'store/dashboard/general_confirm_delete.html', {'object': coupon})
+
+# ==========================================
+# 5. BÁO CÁO DOANH THU (REVENUE REPORT)
+# ==========================================
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth, TruncDay
+from django.http import HttpResponse
+from django.template.loader import get_template
+import datetime
+
+def dashboard_report(request):
+    """Trang Báo Cáo Doanh Thu (Hiển thị biểu đồ / bảng)"""
+    valid_statuses = ['Processing', 'Shipped', 'Delivered']
+    orders = Order.objects.filter(status__in=valid_statuses)
+    
+    # Doanh thu tháng hiện tại
+    now = datetime.datetime.now()
+    current_month_orders = orders.filter(created_at__year=now.year, created_at__month=now.month)
+    total_revenue_month = current_month_orders.aggregate(Sum('total_price'))['total_price__sum'] or 0
+    total_orders_month = current_month_orders.count()
+    
+    # Chi tiết doanh thu theo ngày trong tháng
+    daily_revenue = current_month_orders.annotate(
+        date=TruncDay('created_at')
+    ).values('date').annotate(
+        revenue=Sum('total_price'),
+        orders_count=Count('id')
+    ).order_by('-date')
+
+    context = {
+        'total_revenue_month': total_revenue_month,
+        'total_orders_month': total_orders_month,
+        'daily_revenue': daily_revenue,
+        'current_month': now.strftime('%m/%Y'),
+    }
+    return render(request, 'store/dashboard/report.html', context)
+
+def export_revenue_excel(request):
+    """Xuất file Excel báo cáo doanh thu tháng này"""
+    valid_statuses = ['Processing', 'Shipped', 'Delivered']
+    now = datetime.datetime.now()
+    current_month_orders = Order.objects.filter(status__in=valid_statuses, created_at__year=now.year, created_at__month=now.month)
+    
+    daily_revenue = current_month_orders.annotate(
+        date=TruncDay('created_at')
+    ).values('date').annotate(
+        revenue=Sum('total_price'),
+        orders_count=Count('id')
+    ).order_by('date')
+
+    data = [
+        ['BÁO CÁO DOANH THU THÁNG ' + now.strftime('%m/%Y')],
+        ['Ngày', 'Số đơn hàng thành công', 'Doanh thu (VNĐ)']
+    ]
+    
+    total_rev = 0
+    total_ord = 0
+    for day in daily_revenue:
+        total_rev += day['revenue']
+        total_ord += day['orders_count']
+        data.append([
+            day['date'].strftime('%d/%m/%Y'),
+            day['orders_count'],
+            float(day['revenue'])
+        ])
+        
+    data.append(['TỔNG CỘNG', total_ord, float(total_rev)])
+    
+    import django_excel as excel
+    return excel.make_response_from_array(data, "xlsx", file_name=f"bao_cao_doanh_thu_{now.strftime('%m_%Y')}")
+
+def export_revenue_pdf(request):
+    """Xuất file PDF báo cáo doanh thu"""
+    import xhtml2pdf.pisa as pisa
+    from io import BytesIO
+    
+    valid_statuses = ['Processing', 'Shipped', 'Delivered']
+    now = datetime.datetime.now()
+    current_month_orders = Order.objects.filter(status__in=valid_statuses, created_at__year=now.year, created_at__month=now.month)
+    
+    daily_revenue = current_month_orders.annotate(
+        date=TruncDay('created_at')
+    ).values('date').annotate(
+        revenue=Sum('total_price'),
+        orders_count=Count('id')
+    ).order_by('-date')
+
+    total_revenue_month = current_month_orders.aggregate(Sum('total_price'))['total_price__sum'] or 0
+    total_orders_month = current_month_orders.count()
+
+    context = {
+        'total_revenue_month': total_revenue_month,
+        'total_orders_month': total_orders_month,
+        'daily_revenue': daily_revenue,
+        'current_month': now.strftime('%m/%Y'),
+        'export_time': now.strftime('%d/%m/%Y %H:%M:%S')
+    }
+
+    template_path = 'store/dashboard/report_pdf.html'
+    template = get_template(template_path)
+    html  = template.render(context)
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="bao_cao_doanh_thu_{now.strftime("%m_%Y")}.pdf"'
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
+
+# ==========================================
+# 6. QUẢN LÝ NGƯỜI DÙNG (USER MANAGEMENT)
+# ==========================================
+from django.contrib.auth.models import User
+
+def dashboard_user_list(request):
+    """Hiển thị bảng danh sách toàn bộ người dùng"""
+    query = request.GET.get('q', '')
+    status = request.GET.get('status', '')
+    
+    users = User.objects.all().order_by('-date_joined')
+    
+    if query:
+        users = users.filter(Q(username__icontains=query) | Q(email__icontains=query))
+    
+    if status == 'active':
+        users = users.filter(is_active=True)
+    elif status == 'inactive':
+        users = users.filter(is_active=False)
+        
+    paginator = Paginator(users, 20)
+    page_number = request.GET.get('page')
+    page_users = paginator.get_page(page_number)
+    
+    context = {
+        'users': page_users,
+        'query': query,
+        'status': status
+    }
+    return render(request, 'store/dashboard/user_list.html', context)
+
+def dashboard_user_update(request, user_id):
+    """Admin khóa/mở khóa hoặc sửa thông tin user"""
+    target_user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'toggle_status':
+            # Không cho phép admin khóa chính mình
+            if target_user != request.user:
+                target_user.is_active = not target_user.is_active
+                target_user.save()
+        elif action == 'delete_user':
+            # Không cho phép tự xóa chính mình và khóa không cho xóa superuser
+            if target_user != request.user and not target_user.is_superuser:
+                target_user.delete()
+        return redirect('store:dashboard_user_list')
+        
+    # Nếu muốn dùng form edit, có thể truyền form vào đây. Tạm thời render giao diện liệt kê nhỏ
+    return redirect('store:dashboard_user_list')

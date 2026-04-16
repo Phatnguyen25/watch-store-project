@@ -22,7 +22,7 @@ class StoreForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['category', 'name', 'price', 'description', 'image', 'specs']
+        fields = ['category', 'name', 'price', 'description', 'image', 'specs', 'stock', 'is_active']
         
         # Nhúng class Tailwind vào các thẻ input của HTML
         widgets = {
@@ -38,6 +38,8 @@ class ProductForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': '{"movement": "Automatic", "glass": "Sapphire", "water_proof": "5ATM"}'
             }),
+            'stock': forms.NumberInput(attrs={'class': 'w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer mt-2'})
         }
 
 # ==========================================

@@ -1,27 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}Đăng Nhập - Watch Store O2O{% endblock %}
+{% block title %}Đăng Nhập - Huyền Thoại Trở Lại{% endblock %}
 
 {% block content %}
-<div class="min-h-[70vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-md">
-    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-      Đăng nhập vào tài khoản
-    </h2>
-    <p class="mt-2 text-center text-sm text-gray-600">
-      Hoặc
-      <a href="{% url 'store:register' %}?next={{ request.GET.next|default:'' }}" class="font-medium text-blue-600 hover:text-blue-500">
-        tạo tài khoản mới
-      </a>
-    </p>
+<div class="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 relative overflow-hidden">
+  
+  <!-- Nền Gradient Sáng Trọng lấp lánh nhẹ phía sau -->
+  <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
+    <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
   </div>
 
-  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+  <div class="max-w-5xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row z-10 transform transition-all duration-500 hover:shadow-cyan-100">
+    
+    <!-- Cột Hình Ảnh Bìa Tuyệt Đẹp (Kính / Sang Trọng) -->
+    <div class="w-full md:w-1/2 h-64 md:h-auto bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=1000');">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+      <div class="absolute inset-0 flex flex-col justify-center items-center text-white p-8 text-center">
+        <h2 class="text-4xl font-extrabold mb-2 tracking-tight">Trải nghiệm Dịch vụ <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500">Đẳng Cấp</span></h2>
+        <p class="text-sm font-medium text-gray-200 max-w-xs leading-relaxed hidden md:block">
+           Hệ thống phân phối đồng hồ chính hãng với tích hợp công nghệ GIS và kho bận vận hành tự động.
+        </p>
+      </div>
+    </div>
+
+    <!-- Cột Chứa Form Mượt Mà -->
+    <div class="w-full md:w-1/2 p-8 sm:p-12">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+          Chào Mừng Quay Lại
+        </h2>
+        <p class="mt-3 text-sm text-gray-500">
+          Chưa có tài khoản? 
+          <a href="{% url 'store:register' %}?next={{ request.GET.next|default:'' }}" class="font-bold text-blue-600 hover:text-blue-500 transition-colors border-b border-transparent hover:border-blue-500 pb-0.5">
+            Tạo ngay một cái
+          </a>
+        </p>
+      </div>
+
       {% if messages %}
-        <div class="mb-4">
+        <div class="mb-6 space-y-2">
           {% for message in messages %}
-            <div class="p-4 mb-2 rounded-md {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+            <div class="p-4 rounded-xl text-sm font-medium drop-shadow-sm flex items-center {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-100{% else %}bg-emerald-50 text-emerald-700 border border-emerald-100{% endif %}">
+              {% if message.tags == 'error' %}
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              {% else %}
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              {% endif %}
               {{ message }}
             </div>
           {% endfor %}
@@ -31,18 +55,29 @@
       <form class="space-y-6" action="{% url 'store:login' %}?next={{ request.GET.next|default:'' }}" method="POST">
         {% csrf_token %}
         
-        <div>
-          <label for="id_username" class="block text-sm font-medium text-gray-700"> Tên đăng nhập </label>
-          <div class="mt-1">
-            <input id="id_username" name="username" type="text" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+        <div class="group">
+          <label for="id_username" class="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-blue-600"> 
+            Tên đăng nhập 
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500">
+               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </div>
+            <input id="id_username" name="username" type="text" required class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm shadow-sm" placeholder="Nhập username của bạn...">
           </div>
         </div>
 
-        <div>
-          <label for="id_password" class="block text-sm font-medium text-gray-700"> Mật khẩu </label>
-          <div class="mt-1 relative">
-            <input id="id_password" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10">
-            <button type="button" onclick="togglePassword('id_password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-500 hover:text-gray-700 focus:outline-none">
+        <div class="group">
+          <div class="flex justify-between items-center mb-1">
+            <label for="id_password" class="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600"> Mật khẩu </label>
+            <a href="{% url 'store:password_reset' %}" class="text-sm font-semibold text-blue-600 hover:underline">Quên mật khẩu?</a>
+          </div>
+          <div class="relative">
+             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500">
+               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <input id="id_password" name="password" type="password" required class="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-sm shadow-sm" placeholder="••••••••">
+            <button type="button" onclick="togglePassword('id_password')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors">
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -51,9 +86,10 @@
           </div>
         </div>
 
-        <div>
-          <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            Đăng nhập
+        <div class="pt-2">
+          <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition hover:-translate-y-0.5">
+            Truy Cập Ngay
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
           </button>
         </div>
       </form>

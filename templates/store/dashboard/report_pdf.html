@@ -1,0 +1,121 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Báo Cáo Doanh Thu</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 2cm;
+        }
+        body {
+            /* Support font that has utf8 */
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #1e3a8a;
+            margin: 0;
+            padding: 0;
+            font-size: 24px;
+        }
+        .header p {
+            font-size: 16px;
+            color: #555;
+        }
+        .summary {
+            margin-bottom: 30px;
+        }
+        .summary table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary td {
+            padding: 15px;
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            font-size: 16px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .data-table th {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        .data-table th.right, .data-table td.right {
+            text-align: right;
+        }
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 12px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>BAO CAO DOANH THU KINH DOANH</h1>
+        <p>Thang: {{ current_month }}</p>
+    </div>
+
+    <div class="summary">
+        <table>
+            <tr>
+                <td><strong>So don hang hoan tat:</strong><br/>{{ total_orders_month }} don</td>
+                <td><strong>Tong doanh thu:</strong><br/>{{ total_revenue_month|intcomma }} VND</td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Ngay</th>
+                <th>So don hang</th>
+                <th class="right">Doanh thu (VND)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in daily_revenue %}
+            <tr>
+                <td>{{ day.date|date:"d/m/Y" }}</td>
+                <td>{{ day.orders_count }}</td>
+                <td class="right">{{ day.revenue|intcomma }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center;">Chua co du lieu trong thang nay.</td>
+            </tr>
+            {% endfor %}
+            {% if daily_revenue %}
+            <tr>
+                <td style="font-weight: bold; text-align: right;">Tong cong:</td>
+                <td style="font-weight: bold;">{{ total_orders_month }}</td>
+                <td class="right" style="font-weight: bold; color: #15803d; font-size: 16px;">{{ total_revenue_month|intcomma }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Ngay trich xuat: {{ export_time }}</p>
+        <p>He thong Quan tri Watch Store O2O</p>
+    </div>
+</body>
+</html>

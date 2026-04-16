@@ -5,9 +5,11 @@ from store.models import Product, Category
 def product_list(request):
     """Trang danh sách sản phẩm (lấy từ Database)"""
     products = Product.objects.filter(is_active=True).order_by('-id')
+    best_sellers = Product.objects.filter(is_active=True).order_by('stock')[:4] # Lấy 4 sản phẩm bán chạy (minh hoạ bằng ít tồn kho)
     categories = Category.objects.filter(active=True)
     return render(request, 'store/product/list.html', {
         'products': products,
+        'best_sellers': best_sellers,
         'categories': categories
     })
 
@@ -22,6 +24,8 @@ def category_products(request, slug):
         'products': products,
         'categories': categories
     })
+
+from django.core.paginator import Paginator
 
 def all_products(request):
     """Trang danh sách MỌI sản phẩm"""
@@ -39,8 +43,13 @@ def all_products(request):
     if category_id:
         products = products.filter(category_id=category_id)
         
+    # Phân trang, mỗi trang 10 sản phẩm
+    paginator = Paginator(products, 10)
+    page_number = request.GET.get('page')
+    page_products = paginator.get_page(page_number)
+        
     return render(request, 'store/product/all_products.html', {
-        'products': products,
+        'products': page_products,
         'categories': categories,
         'query': query,
         'category_id': category_id,

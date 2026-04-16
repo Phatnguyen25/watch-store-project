@@ -7,3 +7,6 @@ django-json-widget>=2.0.1
 gunicorn
 Pillow
 requests
+django-excel
+pyexcel-xlsx
+xhtml2pdf

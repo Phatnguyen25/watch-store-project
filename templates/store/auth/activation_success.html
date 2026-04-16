@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Kích Hoạt Thành Công - Watch Store O2O{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-10 text-center transform transition-all">
+    
+    <div class="relative w-28 h-28 mx-auto mb-6">
+      <div class="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-75"></div>
+      <div class="relative w-28 h-28 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner ring-8 ring-green-50">
+        <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+    </div>
+    
+    <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-4">Chào Mừng Gia Nhập! 🎉</h2>
+    <p class="text-gray-600 mb-8 leading-relaxed">Tài khoản của bạn đã được xác thực an toàn và kích hoạt thành công. Hệ thống đã tự động Đăng nhập cho bạn. Hãy bắt đầu chọn lựa những mẫu đồng hồ tinh xảo nhất nhé.</p>
+    
+    <a href="{% url 'store:product_list' %}" class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 w-full">
+      Bắt Đầu Mua Sắm Ngay
+    </a>
+  </div>
+</div>
+{% endblock %}

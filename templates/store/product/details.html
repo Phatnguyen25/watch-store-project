@@ -33,97 +33,236 @@
       </ol>
     </nav>
 
-    <!-- Product Layout -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="grid grid-cols-1 lg:grid-cols-2">
+    <!-- Product Layout CellphoneS Style -->
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden mb-12">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
         
-        <!-- Left Column: Image -->
-        <div class="p-8 lg:p-12 lg:border-r border-gray-100 flex items-center justify-center bg-gray-50/50">
-          <div class="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden bg-white shadow-sm border border-gray-100 flex items-center justify-center group">
+        <!-- Left Column: Image Gallery (Span 7) -->
+        <div class="lg:col-span-7 p-6 lg:p-8 lg:border-r border-gray-100 bg-white flex flex-col items-center">
+          <!-- Main Image Box -->
+          <div class="relative w-full max-w-2xl bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center group mb-6 overflow-hidden">
             {% if product.image %}
-              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" />
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-auto object-cover transform hover:scale-110 transition duration-700 cursor-zoom-in" />
             {% else %}
-              <div class="text-7xl">⌚</div>
+              <div class="text-8xl py-32 text-gray-300">⌚</div>
             {% endif %}
             
             <div class="absolute top-4 left-4 flex flex-col gap-2">
-              <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">CHÍNH HÃNG</span>
-              <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">MỚI 100%</span>
+              <span class="bg-red-500 text-white text-[10px] sm:text-xs font-black uppercase px-3 py-1.5 rounded-full shadow-lg border border-red-600 tracking-wider">Flash Sale</span>
+              <span class="bg-blue-600 text-white text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full shadow-md">CHÍNH HÃNG 100%</span>
+            </div>
+            
+            <!-- Nút Youtube Giả Lập -->
+            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur text-white px-3 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-red-600 transition">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+              <span class="text-xs font-bold">Video Mở Hộp</span>
+            </div>
+          </div>
+          
+          <!-- Thumbnails Carousel (Giả lập) -->
+          <div class="w-full max-w-2xl flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200">
+            <!-- Active thumb -->
+            <div class="w-20 h-20 flex-shrink-0 rounded-lg border-2 border-red-500 overflow-hidden cursor-pointer p-0.5 opacity-100">
+               {% if product.image %}<img src="{{ product.image.url }}" class="w-full h-full object-cover rounded-md" />{% else %}<div class="bg-gray-100 w-full h-full rounded-md"></div>{% endif %}
+            </div>
+            <!-- Other thumbs (Giả lập bằng Unsplash) -->
+            <div class="w-20 h-20 flex-shrink-0 rounded-lg border border-gray-200 overflow-hidden cursor-pointer p-0.5 hover:border-blue-400 opacity-60 hover:opacity-100 transition">
+               <img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover rounded-md" />
+            </div>
+            <div class="w-20 h-20 flex-shrink-0 rounded-lg border border-gray-200 overflow-hidden cursor-pointer p-0.5 hover:border-blue-400 opacity-60 hover:opacity-100 transition">
+               <img src="https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=150&q=80" class="w-full h-full object-cover rounded-md" />
+            </div>
+            <div class="w-20 h-20 flex-shrink-0 rounded-lg border border-gray-200 overflow-hidden cursor-pointer p-0.5 hover:border-blue-400 opacity-60 hover:opacity-100 transition flex items-center justify-center bg-gray-50 text-xs text-gray-500 font-bold">
+               Hiệu Năng
             </div>
           </div>
         </div>
 
-        <!-- Right Column: Details -->
-        <div class="p-8 lg:p-12">
-          {% if product.category %}
-            <div class="mb-3">
-              <a href="{% url 'store:category_products' product.category.slug %}" class="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full uppercase tracking-wider hover:bg-blue-100 transition">
-                {{ product.category.name }}
-              </a>
-            </div>
-          {% endif %}
+        <!-- Right Column: Details (Span 5) -->
+        <div class="lg:col-span-5 p-6 lg:p-8 bg-white flex flex-col">
           
-          <h1 class="text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
-            {{ product.name }}
-          </h1>
+          <!-- Title & Rating -->
+          <div class="border-b border-gray-100 pb-4 mb-5">
+              <h1 class="text-2xl lg:text-[26px] font-extrabold text-gray-900 leading-tight mb-2">
+                {{ product.name }}
+              </h1>
+              <div class="flex items-center space-x-3">
+                <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+                  <div class="flex text-yellow-400">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <!-- ... repeat 4 more -->
+                    <span class="text-yellow-500 text-sm font-bold ml-1">5.0</span>
+                  </div>
+                  <span class="text-sm text-gray-400">(45 đánh giá)</span>
+                </div>
+                <div class="h-4 w-px bg-gray-300"></div>
+                <a href="#specs" class="text-sm text-blue-600 hover:underline">Thông số</a>
+                <div class="h-4 w-px bg-gray-300"></div>
+                <a href="#" class="text-sm text-blue-600 hover:underline">So sánh</a>
+              </div>
+          </div>
           
-          <div class="flex items-center space-x-4 mb-6">
-            <div class="flex items-center gap-1 text-yellow-400">
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+          <!-- Price & Trade-in Box -->
+          <div class="flex flex-col sm:flex-row gap-3 mb-6">
+            <div class="flex-1 rounded-xl p-4 border-2 border-red-500 bg-red-50 shadow-sm relative overflow-hidden flex flex-col justify-center">
+              <span class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">MỚI</span>
+              <p class="text-2xl font-black text-red-600 leading-none mb-1">{{ product.price|intcomma }} ₫</p>
+              <p class="text-xs text-gray-500 line-through">Thị trường: {{ product.price|add:2500000|intcomma }} ₫</p>
             </div>
-            <a href="#reviews" class="text-sm text-blue-600 hover:underline">(Xem đánh giá)</a>
+            
+            <div class="flex-[0.8] rounded-xl p-3 border border-gray-200 bg-gray-50 text-right flex flex-col justify-center cursor-pointer hover:bg-gray-100 transition relative group">
+              <p class="text-[11px] text-gray-600">Thu cũ lên đời chỉ từ</p>
+              <p class="text-lg font-bold text-gray-900 leading-none mt-1">{{ product.price|add:-4000000|intcomma }} ₫</p>
+              <p class="text-[10px] text-red-600 mt-1 uppercase font-bold">Trợ giá qua App <span class="group-hover:-translate-y-1 transition text-blue-600 inline-block">1 Triệu</span></p>
+            </div>
           </div>
 
-          <!-- Pricing -->
-          <div class="p-6 bg-red-50 rounded-xl mb-8 border border-red-100">
-            <p class="text-xs font-semibold text-red-600 uppercase tracking-widest mb-1">Giá bán chính thức</p>
-            <div class="flex items-baseline gap-3">
-              <span class="text-4xl font-black text-red-600">{{ product.price|intcomma }} ₫</span>
+          <!-- Variants Selection (Mocks) -->
+          <h3 class="font-bold text-gray-800 mb-2 text-sm uppercase tracking-wider">Chọn Phiên Bản</h3>
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-4" id="variant-container">
+            <div class="variant-btn border-2 border-red-500 rounded-lg p-2 text-center relative cursor-pointer bg-white transition" onclick="selectVariant(this)">
+               <span class="check-icon absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold">✓</span>
+               <p class="text-[11px] font-bold text-gray-800 leading-tight">Dây Da Chính Hãng</p>
+               <p class="text-[11px] font-semibold text-red-600 price-text">{{ product.price|intcomma }} ₫</p>
             </div>
-            <p class="text-sm text-red-700 mt-2 font-medium">Miễn phí giao hàng toàn quốc</p>
+            <div class="variant-btn border border-gray-300 rounded-lg p-2 text-center relative cursor-pointer hover:border-gray-400 bg-gray-50 transition" onclick="selectVariant(this)">
+               <span class="check-icon hidden absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 items-center justify-center rounded-full text-xs font-bold">✓</span>
+               <p class="text-[11px] font-bold text-gray-800 leading-tight">Dây Titan Thép</p>
+               <p class="text-[11px] font-semibold text-gray-600 price-text">{{ product.price|add:1500000|intcomma }} ₫</p>
+            </div>
+            <div class="variant-btn border border-gray-300 rounded-lg p-2 text-center relative cursor-pointer hover:border-gray-400 bg-gray-50 transition" onclick="selectVariant(this)">
+               <span class="check-icon hidden absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 items-center justify-center rounded-full text-xs font-bold">✓</span>
+               <p class="text-[11px] font-bold text-gray-800 leading-tight">Phiên bản Limited</p>
+               <p class="text-[11px] font-semibold text-gray-600 price-text">{{ product.price|add:4000000|intcomma }} ₫</p>
+            </div>
           </div>
 
-          <!-- Description Summary -->
-          <div class="prose prose-sm text-gray-600 mb-8 whitespace-pre-line">
-            {{ product.description|default:"Chưa có mô tả chi tiết cho sản phẩm này." }}
+          <!-- Color Selection (Mocks) -->
+          <h3 class="font-bold text-gray-800 mb-2 text-sm uppercase tracking-wider">Chọn Màu Sắc</h3>
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-6" id="color-container">
+            <div class="color-btn border-2 border-red-500 rounded-lg p-2 flex items-center gap-2 cursor-pointer bg-white relative transition" onclick="selectColor(this)">
+               <span class="check-icon absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px]">✓</span>
+               <div class="w-6 h-6 rounded-full bg-slate-900 border border-gray-300"></div>
+               <div>
+                 <p class="text-[11px] font-bold text-gray-800 leading-none">Đen Nhám</p>
+                 <p class="text-[10px] text-gray-500 mt-1">{{ product.price|intcomma }} ₫</p>
+               </div>
+            </div>
+            <div class="color-btn border border-gray-300 rounded-lg p-2 flex items-center gap-2 cursor-pointer hover:border-gray-400 transition bg-white relative" onclick="selectColor(this)">
+               <span class="check-icon hidden absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 items-center justify-center rounded-full text-[10px]">✓</span>
+               <div class="w-6 h-6 rounded-full bg-gray-100 border border-gray-300"></div>
+               <div>
+                 <p class="text-[11px] font-bold text-gray-800 leading-none">Trắng Bạc</p>
+                 <p class="text-[10px] text-gray-500 mt-1">{{ product.price|intcomma }} ₫</p>
+               </div>
+            </div>
+          </div>
+
+<script>
+function selectVariant(element) {
+    // Xóa lớp active ở tất cả variant
+    const variants = document.querySelectorAll('.variant-btn');
+    variants.forEach(btn => {
+        btn.classList.remove('border-2', 'border-red-500', 'bg-white');
+        btn.classList.add('border', 'border-gray-300', 'bg-gray-50');
+        btn.querySelector('.check-icon').classList.add('hidden');
+        btn.querySelector('.check-icon').classList.remove('flex');
+        btn.querySelector('.price-text').classList.remove('text-red-600');
+        btn.querySelector('.price-text').classList.add('text-gray-600');
+    });
+
+    // Thêm lớp active vào phần tử được chọn
+    element.classList.remove('border', 'border-gray-300', 'bg-gray-50');
+    element.classList.add('border-2', 'border-red-500', 'bg-white');
+    element.querySelector('.check-icon').classList.remove('hidden');
+    element.querySelector('.check-icon').classList.add('flex');
+    element.querySelector('.price-text').classList.remove('text-gray-600');
+    element.querySelector('.price-text').classList.add('text-red-600');
+}
+
+function selectColor(element) {
+    // Xóa lớp active ở tất cả color
+    const colors = document.querySelectorAll('.color-btn');
+    colors.forEach(btn => {
+        btn.classList.remove('border-2', 'border-red-500');
+        btn.classList.add('border', 'border-gray-300');
+        btn.querySelector('.check-icon').classList.add('hidden');
+        btn.querySelector('.check-icon').classList.remove('flex');
+    });
+
+    // Thêm lớp active vào phần tử được chọn
+    element.classList.remove('border', 'border-gray-300');
+    element.classList.add('border-2', 'border-red-500');
+    element.querySelector('.check-icon').classList.remove('hidden');
+    element.querySelector('.check-icon').classList.add('flex');
+}
+</script>
+
+          <!-- Promo Box -->
+          <div class="border border-red-200 rounded-xl mb-6 shadow-sm overflow-hidden flex-shrink-0">
+             <div class="bg-red-50 text-red-700 px-4 py-2 text-sm font-bold flex items-center border-b border-red-100">
+                <span class="mr-2 text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg></span> ƯU ĐÃI THÊM
+             </div>
+             <div class="p-4 bg-white text-xs text-gray-700 space-y-3">
+               <p class="flex items-start gap-2"><span class="text-green-500 mt-0.5">✅</span> Tặng Gói Bảo Hành Vàng (Rơi vỡ, vào nước) trị giá 1 triệu đồng.</p>
+               <p class="flex items-start gap-2"><span class="text-green-500 mt-0.5">✅</span> Combo phụ kiện Dây đeo chính hãng + Hộp xoay đồng hồ - Giảm ngay 50%.</p>
+               <p class="flex items-start gap-2"><span class="text-green-500 mt-0.5">✅</span> Hoàn tiền 500.000đ khi thanh toán qua thẻ tín dụng VNPAY/MoMo.</p>
+             </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href="{% url 'store:add_to_cart' product.id %}" class="flex-1 text-center bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg border-2 border-transparent hover:bg-blue-700 hover:shadow-xl transition flex flex-col items-center justify-center">
-              <span class="text-lg uppercase">Thêm Vào Giỏ</span>
-              <span class="text-xs font-normal opacity-80 mt-1">Giao tận nơi hoặc nhận tại cửa hàng</span>
+          <div class="mt-auto flex flex-col gap-2">
+            <a href="{% url 'store:add_to_cart' product.id %}" class="w-full text-center bg-gradient-to-r from-red-600 to-red-500 text-white py-3 rounded-xl shadow-lg border-2 border-red-600 hover:from-red-700 hover:to-red-600 transition flex flex-col justify-center transform hover:scale-[1.02]">
+              <span class="font-black text-lg uppercase tracking-wider">Mua Ngay</span>
+              <span class="text-[11px] font-medium">(Giao hàng tận nơi miễn phí toàn quốc)</span>
             </a>
-            
-            <button type="button" class="sm:w-16 w-full h-14 sm:h-auto flex items-center justify-center rounded-xl border-2 border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            </button>
+            <div class="flex gap-2 mt-1">
+              <button class="flex-1 text-center bg-blue-600 text-white py-2 rounded-xl shadow border border-blue-700 hover:bg-blue-700 transition flex flex-col justify-center">
+                <span class="font-bold uppercase text-[13px]">Trả Góp 0%</span>
+                <span class="text-[10px]">Duyệt nhanh 5 phút</span>
+              </button>
+              <button class="flex-1 text-center bg-blue-600 text-white py-2 rounded-xl shadow border border-blue-700 hover:bg-blue-700 transition flex flex-col justify-center">
+                <span class="font-bold uppercase text-[13px]">Trả Góp Thẻ</span>
+                <span class="text-[10px]">Visa, Mastercard, JCB</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Key Features / Specs preview -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Phần thân dưới: Mô tả chi tiết và Thông số Kỹ Thuật (Chuẩn CellphoneS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+      <!-- Cột trái: Bài viết đánh giá -->
+      <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 uppercase">Đặc Điểm Nổi Bật</h2>
+        <div class="prose prose-sm lg:prose max-w-none text-gray-700 whitespace-pre-line">
+          {{ product.description|default:"Sản phẩm này hiện đang cập nhật bài viết đánh giá chi tiết. Mời bạn ghé chi nhánh gần nhất để trải nghiệm thực tế." }}
+        </div>
+      </div>
+      
+      <!-- Cột phải: Thông số chi tiết -->
+      <div class="lg:col-span-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-4">
+          <h2 class="text-lg font-bold text-gray-900 p-5 border-b border-gray-100 bg-gray-50 uppercase">Thông Số Kỹ Thuật</h2>
           {% if product.specs %}
-          <div class="border border-gray-200 rounded-xl overflow-hidden">
-            <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex justify-between items-center">
-              <h3 class="font-bold text-gray-900">Thông Số Kỹ Thuật</h3>
-              <button class="text-sm text-blue-600 font-medium hover:underline">Xem chi tiết</button>
-            </div>
-            <ul class="divide-y divide-gray-100">
+          <div class="p-4">
+            <ul class="divide-y divide-gray-100 text-sm">
               {% for key, value in product.specs.items %}
-                {% if forloop.counter <= 4 %}
-                <li class="px-5 py-3 flex items-center justify-between">
-                  <span class="text-sm text-gray-500">{{ key }}</span>
-                  <span class="text-sm font-bold text-gray-900 text-right">{{ value }}</span>
+                <li class="py-3 flex items-start gap-4">
+                  <span class="w-1/3 text-gray-500 font-medium">{{ key }}</span>
+                  <span class="w-2/3 text-gray-900 font-bold">{{ value }}</span>
                 </li>
-                {% endif %}
               {% endfor %}
             </ul>
           </div>
+          <div class="p-4 pt-0">
+            <button class="w-full py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition text-sm shadow-sm">Xem cấu hình chi tiết ▾</button>
+          </div>
+          {% else %}
+          <div class="p-6 text-center text-sm text-gray-500">Đang cập nhật thông số...</div>
           {% endif %}
-
         </div>
       </div>
     </div>

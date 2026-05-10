@@ -12,7 +12,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
-      <input type="text" name="q" value="{{ query }}" placeholder="Tìm tên hoặc email..." class="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full md:w-64">
+      <input type="text" name="q" value="{{ query }}" placeholder="Tìm tên hoặc email..." class="dashboard-search pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm w-full md:w-64">
     </div>
     
     <select name="status" class="bg-white border text-sm border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 shadow-sm">
@@ -27,92 +27,7 @@
   </form>
 </div>
 
-<div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-left text-sm text-gray-600">
-      <thead class="bg-gray-50 text-gray-700 uppercase font-semibold text-xs border-b border-gray-200">
-        <tr>
-          <th class="px-6 py-4">Người Dùng</th>
-          <th class="px-6 py-4">Tên Thật</th>
-          <th class="px-6 py-4">Ngày Đăng Ký</th>
-          <th class="px-6 py-4 text-center">Trạng Thái</th>
-          <th class="px-6 py-4 text-right">Hành Động</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-100">
-        {% for u in users %}
-        <tr class="hover:bg-blue-50/30 transition">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-blue-100 flex justify-center items-center font-bold text-blue-700 uppercase flex-shrink-0">
-                {{ u.username|slice:":1" }}
-              </div>
-              <div>
-                <p class="font-bold text-gray-900 text-sm">{{ u.username }}</p>
-                <p class="text-xs text-gray-500">{{ u.email }}</p>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-4 font-medium text-gray-800">
-            {{ u.get_full_name|default:"-" }}
-          </td>
-          <td class="px-6 py-4 text-gray-500">
-            {{ u.date_joined|date:"d/m/Y H:i" }}
-          </td>
-          <td class="px-6 py-4 text-center">
-            {% if u.is_superuser %}
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">System Admin</span>
-            {% elif u.is_staff %}
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">Nhân viên</span>
-            {% elif u.is_active %}
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">Hoạt động</span>
-            {% else %}
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">Đã Khóa</span>
-            {% endif %}
-          </td>
-          <td class="px-6 py-4 text-right">
-            <div class="flex justify-end gap-2">
-              <form method="POST" action="{% url 'store:dashboard_user_update' u.id %}" class="inline">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="toggle_status">
-                {% if u.is_active %}
-                  <button type="submit" {% if u == request.user %}disabled{% endif %} class="text-yellow-600 hover:text-yellow-800 font-semibold text-xs px-3 py-1 rounded border border-yellow-200 bg-yellow-50 hover:bg-yellow-100 transition {% if u == request.user %}opacity-50 cursor-not-allowed{% endif %}" onclick="return confirm('Bạn có chắc muốn Khóa tài khoản này?')">
-                    🔒 Khóa
-                  </button>
-                {% else %}
-                  <button type="submit" class="text-green-600 hover:text-green-800 font-semibold text-xs px-3 py-1 rounded border border-green-200 bg-green-50 hover:bg-green-100 transition">
-                    🔓 Mở khóa
-                  </button>
-                {% endif %}
-              </form>
-
-              <!-- Form xoá -->
-              <!-- Vô hiệu hóa nút Xóa đối với chính mình và các user là Admin Tối Cao -->
-              <form method="POST" action="{% url 'store:dashboard_user_update' u.id %}" class="inline">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete_user">
-                <button type="submit" {% if u == request.user or u.is_superuser %}disabled{% endif %} class="text-red-600 hover:text-red-800 font-semibold text-xs px-3 py-1 rounded border border-red-200 bg-red-50 hover:bg-red-100 transition {% if u == request.user or u.is_superuser %}opacity-50 cursor-not-allowed{% endif %}" onclick="return confirm('CẢNH BÁO: Hành động này sẽ xóa xạch dữ liệu của khách hàng bao gồm cả Đơn Hàng. Bạn có chắc chắn Xóa Vĩnh Viễn tài khoản này không?');">
-                  🗑️ Xóa
-                </button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="px-6 py-10 text-center text-gray-500">
-            Không tìm thấy người dùng nào!
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  
-  {% if users.has_other_pages %}
-  <div class="px-6 py-4 border-t border-gray-200">
-    {% include 'store/dashboard/pagination.html' with page_obj=users %}
-  </div>
-  {% endif %}
+<div id="dashboard-table-container">
+    {% include 'store/dashboard/user_table_fragment.html' with users=users %}
 </div>
 {% endblock %}

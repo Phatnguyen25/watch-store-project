@@ -8,6 +8,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
+from decimal import Decimal
 
 def get_cart_data(request):
     """Hàm bổ trợ: Tính toán dữ liệu giỏ hàng từ Session hoặc Database"""
@@ -76,9 +77,50 @@ def add_to_cart(request, product_id):
 
 def cart_detail(request):
     cart_items, cart_total = get_cart_data(request)
+    
+    # Khởi tạo các giá trị mặc định
+    discount_amount = 0
+    discount_percent = 0
+    coupon_code = ""
+
+    # Xử lý áp dụng mã giảm giá (Coupon) qua POST
+    if request.method == "POST":
+        coupon_code = request.POST.get('coupon_code', '').strip()
+        if coupon_code:
+            try:
+                from store.models import Coupon
+                coupon = Coupon.objects.get(code__iexact=coupon_code, active=True)
+                discount_percent = coupon.discount_percent
+                discount_amount = (cart_total * discount_percent) / 100
+                
+                # Lưu vào session để dùng cho trang Checkout
+                request.session['coupon_id'] = coupon.id
+                request.session['discount_amount'] = float(discount_amount)
+                request.session['discount_percent'] = discount_percent
+                
+                from django.contrib import messages
+                messages.success(request, f"Đã áp dụng mã giảm giá: {coupon.code} (-{discount_percent}%)")
+            except Coupon.DoesNotExist:
+                from django.contrib import messages
+                messages.error(request, "Mã giảm giá không tồn tại hoặc đã hết hạn.")
+                # Xóa thông tin giảm giá cũ nếu mã mới sai
+                request.session.pop('coupon_id', None)
+                request.session.pop('discount_amount', None)
+                request.session.pop('discount_percent', None)
+    else:
+        # Nếu là GET, kiểm tra xem đã có mã trong session chưa để hiển thị lại
+        # Luôn ép kiểu Decimal để tính toán an toàn
+        discount_amount = Decimal(str(request.session.get('discount_amount', 0)))
+        discount_percent = request.session.get('discount_percent', 0)
+
+    final_total = cart_total - Decimal(str(discount_amount))
+
     return render(request, 'store/cart/cart_detail.html', {
         'cart_items': cart_items, 
-        'cart_total': cart_total
+        'sub_total': cart_total,      # Đồng bộ với Template
+        'discount_amount': discount_amount,
+        'discount_percent': discount_percent,
+        'final_total': final_total    # Đồng bộ với Template
     })
 
 def update_cart(request, item_id, action):
@@ -156,6 +198,11 @@ def apply_coupon(request):
 def checkout(request):
     cart_items, cart_total = get_cart_data(request)
     
+    # Lấy thông tin giảm giá từ session (đã áp dụng ở trang giỏ hàng)
+    # Ép kiểu Decimal để tránh lỗi TypeError khi tính toán với cart_total
+    discount_amount = Decimal(str(request.session.get('discount_amount', 0)))
+    final_total = max(Decimal('0'), cart_total - discount_amount)
+    
     if not cart_items:
         # Nếu không có sản phẩm nào trong giỏ (từ DB hoặc session), quay về trang chủ
         return redirect('store:product_list')
@@ -167,13 +214,14 @@ def checkout(request):
         
         user = request.user
         
+        # Tạo đơn hàng với giá tiền thực tế ĐÃ GIẢM
         order = Order.objects.create(
             user=user,
             email=user.email,
             full_name=full_name,
             phone=phone,
             address=address,
-            total_price=cart_total,
+            total_price=final_total,
             status='Pending'
         )
         
@@ -223,7 +271,9 @@ def checkout(request):
 
     return render(request, 'store/cart/checkout.html', {
         'cart_items': cart_items,
-        'cart_total': cart_total,
+        'sub_total': cart_total,
+        'discount_amount': discount_amount,
+        'cart_total': final_total, # Tại checkout hiển thị Tổng cuối là chủ yếu
     })
 
 def checkout_success(request):

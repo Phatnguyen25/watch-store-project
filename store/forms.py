@@ -20,6 +20,11 @@ class StoreForm(forms.ModelForm):
 # 2. FORM SẢN PHẨM (Do bạn custom)
 # ==========================================
 class ProductForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hiển thị ID danh mục trong nhãn của dropdown
+        self.fields['category'].label_from_instance = lambda obj: f"{obj.name} (#ID: {obj.id})"
+
     class Meta:
         model = Product
         fields = ['category', 'name', 'price', 'description', 'image', 'specs', 'stock', 'is_active']

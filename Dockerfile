@@ -12,6 +12,12 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     gdal-bin \
     libgdal-dev \
     python3-gdal \
+    build-essential \
+    pkg-config \
+    libcairo2 \
+    libcairo2-dev \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Thiết lập thư mục làm việc

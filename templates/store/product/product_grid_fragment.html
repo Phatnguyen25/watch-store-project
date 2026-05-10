@@ -1,0 +1,28 @@
+{% load humanize %}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+  {% for p in products %}
+  <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 overflow-hidden group">
+    <a href="{% url 'store:product_detail' p.pk %}" class="relative h-48 md:h-56 overflow-hidden bg-gray-100 block">
+      {% if p.image %}
+      <img src="{{ p.image.url }}" alt="{{ p.name }}" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500" />
+      {% else %}
+      <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200 text-3xl">⌚</div>
+      {% endif %}
+    </a>
+    <div class="p-4">
+      <h3 class="text-sm md:text-base font-bold text-gray-900 mb-1 truncate hover:text-blue-600">
+        <a href="{% url 'store:product_detail' p.pk %}">{{ p.name }}</a>
+      </h3>
+      <p class="text-base md:text-lg font-black text-blue-600 mt-2">
+        {{ p.price|intcomma }} ₫
+      </p>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-span-full py-20 text-center">
+    <div class="text-6xl mb-4">🔍</div>
+    <h3 class="text-xl font-bold text-gray-900">Không tìm thấy sản phẩm nào</h3>
+    <p class="text-gray-500">Thử tìm kiếm với từ khóa khác xem sao bạn nhé!</p>
+  </div>
+  {% endfor %}
+</div>

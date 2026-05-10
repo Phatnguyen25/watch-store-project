@@ -1,0 +1,102 @@
+{% extends 'store/dashboard/dashboard_base.html' %}
+{% load humanize %}
+
+{% block header_title %}Lịch sử Biến động Kho{% endblock %}
+
+{% block dashboard_content %}
+<!-- Bộ lọc -->
+<div class="mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <form method="GET" class="flex items-center gap-4">
+        <div class="relative">
+            <select name="product_id" class="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm bg-white appearance-none" onchange="this.form.submit()">
+                <option value="">Tất cả sản phẩm</option>
+                {% for p in products_list %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <span class="text-gray-400 text-sm">Tìm thấy {{ history.paginator.count }} bản ghi</span>
+    </form>
+</div>
+
+<!-- Bảng Lịch sử -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Thời gian</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Sản phẩm</th>
+                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Biến động</th>
+                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Tồn cuối</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Người thực hiện</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Ghi chú</th>
+                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+            {% for entry in history %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ entry.created_at|date:"d/m/Y" }}<br/>
+                    <span class="text-xs font-medium text-gray-400">{{ entry.created_at|date:"H:i" }}</span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        {% if entry.product.image %}
+                        <img src="{{ entry.product.image.url }}" class="h-10 w-10 rounded-lg object-cover mr-3 border border-gray-100">
+                        {% endif %}
+                        <div class="text-sm">
+                            <div class="font-bold text-gray-900">{{ entry.product.name }}</div>
+                            <div class="text-xs text-gray-400">ID: #{{ entry.product.id }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    {% if entry.change_amount > 0 %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                        +{{ entry.change_amount }}
+                    </span>
+                    {% elif entry.change_amount < 0 %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                        {{ entry.change_amount }}
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
+                        0
+                    </span>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 text-center text-sm font-bold text-gray-700">
+                    {{ entry.stock_after }}
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase mr-2">
+                            {{ entry.user.username|slice:":2" }}
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">{{ entry.user.username }}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-600 font-medium">{{ entry.get_type_display }}</div>
+                    {% if entry.note %}
+                    <div class="text-xs text-gray-400 mt-0.5 max-w-[200px] truncate">{{ entry.note }}</div>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <a href="{% url 'store:dashboard_stock_history_detail' entry.pk %}" class="text-blue-600 hover:text-blue-900 font-bold text-sm bg-blue-50 px-3 py-1.5 rounded-lg transition">Xem</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-gray-400 italic">
+                    Chưa có lịch sử biến động kho nào.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'store/dashboard/pagination.html' with page_obj=history %}
+{% endblock %}

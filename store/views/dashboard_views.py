@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
-from store.models import Product, Store, Category, Coupon
-from store.models.order import Order
+from django.contrib import messages
+from store.models import Product, Store, Category, Coupon, Order, OrderItem, StockHistory
 from store.forms import ProductForm, StoreForm, CategoryForm, CouponForm, OrderForm
+import django_excel as excel
 
 def dashboard_home(request):
     """VIEW ĐỘNG: Lấy số liệu thật từ Database cho trang Tổng quan"""
@@ -54,6 +55,11 @@ def dashboard_product_list(request):
         'status': status,
         'categories': categories,
     }
+
+    # Nếu là yêu cầu AJAX từ Live-search
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'store/dashboard/product_table_fragment.html', context)
+
     return render(request, 'store/dashboard/product_list.html', context)
 
 def dashboard_store_list(request):
@@ -81,6 +87,11 @@ def dashboard_store_list(request):
         'query': query,
         'status': status,
     }
+
+    # Nếu là yêu cầu AJAX từ Live-search
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'store/dashboard/store_table_fragment.html', context)
+
     return render(request, 'store/dashboard/store_list.html', context)
 
 def dashboard_category_list(request):
@@ -106,6 +117,11 @@ def dashboard_category_list(request):
         'query': query,
         'status': status,
     }
+
+    # Nếu là yêu cầu AJAX từ Live-search
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'store/dashboard/category_table_fragment.html', context)
+
     return render(request, 'store/dashboard/category_list.html', context)
 
 def dashboard_coupon_list(request):
@@ -131,7 +147,36 @@ def dashboard_coupon_list(request):
         'query': query,
         'status': status,
     }
+
+    # Nếu là yêu cầu AJAX từ Live-search
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'store/dashboard/coupon_table_fragment.html', context)
+
     return render(request, 'store/dashboard/coupon_list.html', context)
+
+def dashboard_stock_history(request):
+    """View hiển thị lịch sử biến động kho"""
+    history_list = StockHistory.objects.all().select_related('product', 'user')
+    
+    # Filter theo sản phẩm nếu có
+    product_id = request.GET.get('product_id')
+    if product_id:
+        history_list = history_list.filter(product_id=product_id)
+        
+    paginator = Paginator(history_list, 20)
+    page_number = request.GET.get('page')
+    history = paginator.get_page(page_number)
+    
+    return render(request, 'store/dashboard/stock_history.html', {
+        'history': history,
+        'page_obj': history,
+        'products_list': Product.objects.all().only('id', 'name')
+    })
+
+def dashboard_stock_history_detail(request, pk):
+    """View chi tiết một bản ghi biến động kho"""
+    entry = get_object_or_404(StockHistory, pk=pk)
+    return render(request, 'store/dashboard/stock_history_detail.html', {'entry': entry})
 
 def dashboard_order_list(request):
     q = request.GET.get('q', '')
@@ -147,14 +192,36 @@ def dashboard_order_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'store/dashboard/order_list.html', {
+    context = {
         'orders': page_obj.object_list,
         'page_obj': page_obj,
         'paginator': paginator,
         'is_paginated': page_obj.has_other_pages(),
         'q': q,
         'status': status
-    })
+    }
+
+    # Nếu là yêu cầu AJAX từ Live-search
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'store/dashboard/order_table_fragment.html', context)
+
+    return render(request, 'store/dashboard/order_list.html', context)
+
+def dashboard_order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    # OrderItem liên quan thông qua related_name='items'
+    order_items = order.items.all().select_related('product')
+    
+    # Tính thành tiền cho từng sản phẩm
+    for item in order_items:
+        item.subtotal = item.price * item.quantity
+        
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'title': f'Chi tiết Đơn hàng #{order.id}'
+    }
+    return render(request, 'store/dashboard/order_detail.html', context)
 
 def dashboard_order_update(request, pk):
     order = get_object_or_404(Order, pk=pk)
@@ -202,7 +269,7 @@ def export_products_excel(request):
     
     # Tạo tiêu đề cột
     data = [
-        ['ID', 'Tên sản phẩm', 'ID Danh mục', 'Giá', 'Tồn kho', 'Hiển thị']
+        ['ID', 'Tên sản phẩm', 'ID Danh mục', 'Giá', 'Tổng Tồn Kho Hiện Tại']
     ]
     
     # Nạp dữ liệu
@@ -212,68 +279,96 @@ def export_products_excel(request):
             p.name,
             p.category_id if p.category_id else '',
             p.price,
-            p.stock,
-            "Có" if p.is_active else "Không"
+            p.stock
         ])
         
     # Trả về file excel
     return excel.make_response_from_array(data, "xlsx", file_name="danh_sach_san_pham")
 
+def download_product_template(request):
+    """Xuất file Excel mẫu để nhập hàng"""
+    data = [
+        ['ID (Để trống nếu thêm mới)', 'Tên Sản Phẩm', 'Mã Danh Mục (ID)', 'Giá (VNĐ)', 'Số Lượng Nhập Thêm']
+    ]
+    # Thêm một dòng ví dụ
+    data.append([None, 'Đồng Hồ Ví Dụ 01', 1, 1500000, 10])
+    
+    return excel.make_response_from_array(data, "xlsx", file_name="mau_nhap_lieu_san_pham")
+
 def import_products_excel(request):
     if request.method == "POST":
         excel_file = request.FILES.get("excel_file")
         if not excel_file:
+            messages.error(request, "Vui lòng chọn file Excel.")
             return redirect('store:dashboard_product_list')
             
         try:
-            # Lấy dữ liệu dạng mảng dòng
-            data = excel_file.get_array()
+            # Sử dụng trực tiếp pyexcel (thư viện lõi) để đảm bảo độ ổn định cao nhất
+            import pyexcel
+            file_extension = excel_file.name.split('.')[-1]
+            data = pyexcel.get_array(file_content=excel_file.read(), file_type=file_extension)
             
-            # Bỏ qua dòng tiêu đề (index 0)
+            success_count = 0
+            
             for row in data[1:]:
-                if not row or len(row) < 6:
+                if not row or len(row) < 5:
                     continue
                     
                 pid = row[0]
                 name = str(row[1]).strip()
                 cat_id = row[2]
-                price = row[3]
-                stock = row[4]
-                is_active_str = str(row[5]).strip()
-                
-                is_active = (is_active_str == "Có")
-                
-                # Làm sạch dữ liệu rỗng
-                if cat_id == '':
-                    cat_id = None
-                
-                if not name:
+                try:
+                    price = float(row[3])
+                    new_stock = int(row[4])
+                except (ValueError, TypeError):
                     continue
-                    
-                # Nếu có ID -> Cập nhật (Update)
-                if pid:
-                    try:
+                
+                if not name: continue
+                
+                # Logic cập nhật hoặc tạo mới và ghi lịch sử
+                try:
+                    if pid and str(pid).isdigit():
                         p = Product.objects.get(id=int(pid))
+                        old_stock = p.stock
                         p.name = name
-                        p.category_id = cat_id
+                        p.category_id = cat_id if cat_id else None
                         p.price = price
-                        p.stock = stock
-                        p.is_active = is_active
+                        p.stock += new_stock  # CỘNG DỒN TỒN KHO
                         p.save()
-                    except (Product.DoesNotExist, ValueError):
-                        pass
-                # Nếu không có ID -> Tạo mới (Create)
-                else:
-                    Product.objects.create(
-                        name=name,
-                        category_id=cat_id,
-                        price=price,
-                        stock=stock,
-                        is_active=is_active
-                    )
+                        
+                        StockHistory.objects.create(
+                            product=p,
+                            user=request.user,
+                            stock_before=old_stock,
+                            stock_after=p.stock,
+                            change_amount=new_stock,
+                            type='Import',
+                            note=f"Nhập thêm qua Excel"
+                        )
+                    else:
+                        p = Product.objects.create(
+                            name=name,
+                            category_id=cat_id if cat_id else None,
+                            price=price,
+                            stock=new_stock
+                        )
+                        StockHistory.objects.create(
+                            product=p,
+                            user=request.user,
+                            stock_before=0,
+                            stock_after=new_stock,
+                            change_amount=new_stock,
+                            type='Import',
+                            note="Thêm mới qua Excel"
+                        )
+                    success_count += 1
+                except Exception as e:
+                    print(f"Error importing row: {e}")
+                    continue
+            
+            messages.success(request, f"Đã nhập thành công {success_count} sản phẩm.")
         except Exception as e:
-            # Nếu có lỗi (ví dụ file sai format)
-            pass
+            messages.error(request, f"Lỗi xử lý file: {str(e)}")
             
     return redirect('store:dashboard_product_list')
 
@@ -289,10 +384,23 @@ def product_create(request):
 
 def product_update(request, pk):
     product = get_object_or_404(Product, pk=pk)
+    old_stock = product.stock
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()
+            p = form.save()
+            new_stock = p.stock
+            if old_stock != new_stock:
+                StockHistory.objects.create(
+                    product=p,
+                    user=request.user,
+                    stock_before=old_stock,
+                    stock_after=new_stock,
+                    change_amount=new_stock - old_stock,
+                    type='Update',
+                    note="Cập nhật thủ công tại trang quản trị"
+                )
+            messages.success(request, f"Cập nhật sản phẩm '{p.name}' thành công.")
             return redirect('store:dashboard_product_list')
     else:
         form = ProductForm(instance=product)
@@ -413,11 +521,15 @@ import datetime
 def dashboard_report(request):
     """Trang Báo Cáo Doanh Thu (Hiển thị biểu đồ / bảng)"""
     valid_statuses = ['Processing', 'Shipped', 'Delivered']
-    orders = Order.objects.filter(status__in=valid_statuses)
+    orders_qs = Order.objects.filter(status__in=valid_statuses)
     
-    # Doanh thu tháng hiện tại
+    # Lấy tham số tháng/năm từ URL, mặc định là hiện tại
     now = datetime.datetime.now()
-    current_month_orders = orders.filter(created_at__year=now.year, created_at__month=now.month)
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    
+    # Lọc đơn hàng theo tháng/năm đã chọn
+    current_month_orders = orders_qs.filter(created_at__year=year, created_at__month=month)
     total_revenue_month = current_month_orders.aggregate(Sum('total_price'))['total_price__sum'] or 0
     total_orders_month = current_month_orders.count()
     
@@ -429,19 +541,42 @@ def dashboard_report(request):
         orders_count=Count('id')
     ).order_by('-date')
 
+    # Chuẩn bị dữ liệu cho Chart.js
+    chart_labels = [day['date'].strftime('%d/%m') for day in reversed(daily_revenue)]
+    chart_data = [float(day['revenue']) for day in reversed(daily_revenue)]
+
+    # Lấy 15 đơn hàng gần đây nhất trong tháng
+    recent_orders = current_month_orders.order_by('-created_at')[:15]
+
+    # Danh sách năm để lọc (từ 2024 đến năm hiện tại)
+    years_range = range(2024, now.year + 1)
+
     context = {
         'total_revenue_month': total_revenue_month,
         'total_orders_month': total_orders_month,
         'daily_revenue': daily_revenue,
-        'current_month': now.strftime('%m/%Y'),
+        'current_month': month,
+        'current_year': year,
+        'display_date': f"{month:02d}/{year}",
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'recent_orders': recent_orders,
+        'years_range': years_range,
     }
     return render(request, 'store/dashboard/report.html', context)
 
 def export_revenue_excel(request):
-    """Xuất file Excel báo cáo doanh thu tháng này"""
+    """Xuất file Excel báo cáo doanh thu theo tháng/năm"""
     valid_statuses = ['Processing', 'Shipped', 'Delivered']
     now = datetime.datetime.now()
-    current_month_orders = Order.objects.filter(status__in=valid_statuses, created_at__year=now.year, created_at__month=now.month)
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    
+    current_month_orders = Order.objects.filter(
+        status__in=valid_statuses, 
+        created_at__year=year, 
+        created_at__month=month
+    )
     
     daily_revenue = current_month_orders.annotate(
         date=TruncDay('created_at')
@@ -450,8 +585,9 @@ def export_revenue_excel(request):
         orders_count=Count('id')
     ).order_by('date')
 
+    display_date = f"{month:02d}/{year}"
     data = [
-        ['BÁO CÁO DOANH THU THÁNG ' + now.strftime('%m/%Y')],
+        ['BÁO CÁO DOANH THU THÁNG ' + display_date],
         ['Ngày', 'Số đơn hàng thành công', 'Doanh thu (VNĐ)']
     ]
     
@@ -469,16 +605,23 @@ def export_revenue_excel(request):
     data.append(['TỔNG CỘNG', total_ord, float(total_rev)])
     
     import django_excel as excel
-    return excel.make_response_from_array(data, "xlsx", file_name=f"bao_cao_doanh_thu_{now.strftime('%m_%Y')}")
+    return excel.make_response_from_array(data, "xlsx", file_name=f"bao_cao_doanh_thu_{month:02d}_{year}")
 
 def export_revenue_pdf(request):
-    """Xuất file PDF báo cáo doanh thu"""
+    """Xuất file PDF báo cáo doanh thu theo tháng/năm"""
     import xhtml2pdf.pisa as pisa
     from io import BytesIO
     
     valid_statuses = ['Processing', 'Shipped', 'Delivered']
     now = datetime.datetime.now()
-    current_month_orders = Order.objects.filter(status__in=valid_statuses, created_at__year=now.year, created_at__month=now.month)
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+    
+    current_month_orders = Order.objects.filter(
+        status__in=valid_statuses, 
+        created_at__year=year, 
+        created_at__month=month
+    )
     
     daily_revenue = current_month_orders.annotate(
         date=TruncDay('created_at')
@@ -494,7 +637,7 @@ def export_revenue_pdf(request):
         'total_revenue_month': total_revenue_month,
         'total_orders_month': total_orders_month,
         'daily_revenue': daily_revenue,
-        'current_month': now.strftime('%m/%Y'),
+        'current_month': f"{month:02d}/{year}",
         'export_time': now.strftime('%d/%m/%Y %H:%M:%S')
     }
 
@@ -503,7 +646,7 @@ def export_revenue_pdf(request):
     html  = template.render(context)
     
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="bao_cao_doanh_thu_{now.strftime("%m_%Y")}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="bao_cao_doanh_thu_{month:02d}_{year}.pdf"'
     
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err:
@@ -539,6 +682,11 @@ def dashboard_user_list(request):
         'query': query,
         'status': status
     }
+
+    # Nếu là yêu cầu AJAX từ Live-search
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'store/dashboard/user_table_fragment.html', context)
+
     return render(request, 'store/dashboard/user_list.html', context)
 
 def dashboard_user_update(request, user_id):

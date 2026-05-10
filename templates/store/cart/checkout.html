@@ -86,6 +86,19 @@
                     {% endfor %}
                 </ul>
                 
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between text-gray-600 text-sm">
+                        <span>Tạm tính:</span>
+                        <span class="font-semibold">{{ sub_total|intcomma }} ₫</span>
+                    </div>
+                    {% if discount_amount > 0 %}
+                    <div class="flex justify-between text-green-600 text-sm">
+                        <span>Giảm giá:</span>
+                        <span class="font-bold">-{{ discount_amount|intcomma }} ₫</span>
+                    </div>
+                    {% endif %}
+                </div>
+
                 <div class="flex justify-between items-center border-t border-gray-200 pt-4">
                     <span class="text-xl font-bold text-gray-900">Tổng cộng:</span>
                     <span class="text-2xl font-black text-blue-600">{{ cart_total|intcomma }} ₫</span>

@@ -6,7 +6,7 @@
 <form method="GET" class="flex justify-between items-center mb-6">
     <div class="flex items-center space-x-2 flex-1 max-w-lg">
         <div class="relative flex-1">
-            <input type="text" name="q" value="{{ query }}" placeholder="Tìm mã code..." class="w-full pl-10 py-2 border border-gray-300 rounded-lg text-sm" />
+            <input type="text" name="q" value="{{ query }}" placeholder="Tìm mã code..." class="dashboard-search w-full pl-10 py-2 border border-gray-300 rounded-lg text-sm" />
             <button type="submit" class="absolute left-3 top-2.5 text-gray-400">🔍</button>
         </div>
         <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="this.form.submit()">
@@ -18,29 +18,7 @@
     <a href="{% url 'store:coupon_create' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition ml-4 whitespace-nowrap">Tạo Mã Mới</a>
 </form>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mã (Code)</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mức giảm</th>
-                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Thao tác</th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-            {% for coupon in coupons %}
-            <tr class="hover:bg-gray-50 transition">
-                <td class="px-6 py-4 text-sm font-black text-blue-600">{{ coupon.code }}</td>
-                <td class="px-6 py-4 text-sm font-bold text-red-500">-{{ coupon.discount_percent }}%</td>
-                <td class="px-6 py-4 text-right text-sm">
-                    <a href="{% url 'store:coupon_update' coupon.pk %}" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md mr-2">Sửa</a>
-                    <a href="{% url 'store:coupon_delete' coupon.pk %}" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-md">Xóa</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div id="dashboard-table-container">
+    {% include 'store/dashboard/coupon_table_fragment.html' with coupons=coupons %}
 </div>
-
-{% include 'store/dashboard/pagination.html' with page_obj=coupons %}
 {% endblock %}

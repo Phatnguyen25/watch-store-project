@@ -90,10 +90,9 @@
                 <div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
                   <div class="flex text-yellow-400">
                     <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                    <!-- ... repeat 4 more -->
-                    <span class="text-yellow-500 text-sm font-bold ml-1">5.0</span>
+                    <span class="text-yellow-500 text-sm font-bold ml-1">{{ avg_rating }}</span>
                   </div>
-                  <span class="text-sm text-gray-400">(45 đánh giá)</span>
+                  <span class="text-sm text-gray-400">({{ reviews_count }} đánh giá)</span>
                 </div>
                 <div class="h-4 w-px bg-gray-300"></div>
                 <a href="#specs" class="text-sm text-blue-600 hover:underline">Thông số</a>
@@ -267,6 +266,242 @@ function selectColor(element) {
       </div>
     </div>
     
-  </div>
-</div>
+    <!-- PHẦN ĐÁNH GIÁ & BÌNH LUẬN (REVIEWS) -->
+    <div id="reviews-section" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-12">
+      <div class="p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-8 uppercase flex items-center gap-2">
+          <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+          Đánh giá & Nhận xét {{ product.name }}
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+          <!-- Tổng quát số sao -->
+          <div class="md:col-span-4 flex flex-col items-center justify-center bg-gray-50 rounded-2xl p-6 border border-gray-100">
+            <p class="text-5xl font-black text-gray-900 mb-2">{{ avg_rating }}<span class="text-2xl text-gray-400">/5</span></p>
+            <div class="flex text-yellow-400 mb-2">
+              {% for i in "1"|rjust:5 %}
+                <svg class="w-6 h-6 {% if forloop.counter <= avg_rating %}fill-current{% else %}text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+              {% endfor %}
+            </div>
+            <p class="text-sm text-gray-500 font-medium">{{ reviews_count }} đánh giá & bình luận</p>
+          </div>
+
+          <!-- Form gửi bình luận -->
+          <div class="md:col-span-8">
+            {% if user.is_authenticated %}
+              <div id="review-status-box" class="{% if not user_review %}hidden{% endif %}">
+                <div class="bg-green-50 border border-green-100 rounded-2xl p-6 text-center h-full flex flex-col justify-center items-center">
+                  <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4 text-2xl">✓</div>
+                  <p class="text-green-800 font-bold mb-1">Cảm ơn đã đánh giá!</p>
+                  <p class="text-green-600 text-sm mb-4">Bạn đã gửi nhận xét cho sản phẩm này.</p>
+                  <button type="button" id="edit-review-btn" class="text-blue-600 font-bold text-sm hover:underline">Chỉnh sửa đánh giá</button>
+                </div>
+              </div>
+
+              <form id="review-form" class="space-y-4 {% if user_review %}hidden{% endif %}">
+                {% csrf_token %}
+                <div>
+                  <label class="block text-sm font-bold text-gray-700 mb-2">Bạn đánh giá sao về sản phẩm này?</label>
+                  <div class="flex gap-2" id="star-rating-selector">
+                    {% for i in "12345" %}
+                    <button type="button" data-value="{{ forloop.counter }}" class="star-btn p-1 text-gray-300 hover:text-yellow-400 transition transform hover:scale-110">
+                      <svg class="w-8 h-8 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </button>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="rating" id="id_rating" value="{{ user_review.rating|default:5 }}">
+                </div>
+                <div>
+                  <textarea name="content" id="id_content" rows="3" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none text-sm">{{ user_review.content|default:'' }}</textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                  {% if user_review %}
+                  <button type="button" id="cancel-edit-btn" class="px-6 py-2.5 text-gray-500 font-bold text-sm hover:bg-gray-100 rounded-lg transition">Hủy</button>
+                  {% endif %}
+                  <button type="submit" class="bg-blue-600 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition transform active:scale-95">
+                    {% if user_review %}Cập nhật đánh giá{% else %}Gửi đánh giá{% endif %}
+                  </button>
+                </div>
+              </form>
+            {% else %}
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
+              <p class="text-blue-800 font-medium mb-3 text-sm">Vui lòng đăng nhập để gửi đánh giá của bạn.</p>
+              <a href="{% url 'store:login' %}?next={{ request.path }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition">Đăng nhập ngay</a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mt-12 space-y-6" id="reviews-list">
+          <h3 class="text-sm font-black text-gray-500 uppercase tracking-widest border-b border-gray-100 pb-2">Tất cả nhận xét ({{ reviews_count }})</h3>
+          
+          {% for review in reviews %}
+          <div class="flex gap-4 p-4 rounded-2xl hover:bg-gray-50 transition border border-transparent hover:border-gray-100">
+            <div class="flex-shrink-0">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 uppercase border border-blue-200">
+                {{ review.user.username|slice:":1" }}
+              </div>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <p class="font-bold text-gray-900 text-sm">{{ review.user.username }}</p>
+                <span class="text-[10px] text-gray-400 font-medium">{{ review.created_at|date:"d/m/Y" }}</span>
+              </div>
+              <div class="flex text-yellow-400 mb-2">
+                {% if review.rating > 0 %}
+                    {% with ""|center:review.rating as range %}
+                        {% for _ in range %}
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        {% endfor %}
+                    {% endwith %}
+                {% endif %}
+              </div>
+              <p class="text-sm text-gray-700 leading-relaxed">{{ review.content }}</p>
+            </div>
+          </div>
+          {% empty %}
+          <div class="py-12 text-center text-gray-400 italic text-sm">
+            Sản phẩm này chưa có đánh giá nào. Hãy là người đầu tiên!
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+<script>
+  // Xử lý chọn sao
+  const starBtns = document.querySelectorAll('.star-btn');
+  const ratingInput = document.getElementById('id_rating');
+
+  starBtns.forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      const val = parseInt(btn.dataset.value);
+      highlightStars(val);
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      highlightStars(parseInt(ratingInput.value));
+    });
+
+    btn.addEventListener('click', () => {
+      ratingInput.value = btn.dataset.value;
+      highlightStars(parseInt(btn.dataset.value));
+    });
+  });
+
+  function highlightStars(count) {
+    starBtns.forEach((btn, idx) => {
+      if (idx < count) {
+        btn.classList.add('text-yellow-400');
+        btn.classList.remove('text-gray-300');
+      } else {
+        btn.classList.remove('text-yellow-400');
+        btn.classList.add('text-gray-300');
+      }
+    });
+  }
+
+  // Khởi tạo highlight ban đầu dựa vào input rating
+  highlightStars(parseInt(ratingInput.value || 5));
+
+  // LOGIC CHỈNH SỬA (TOGGLE)
+  const editBtn = document.getElementById('edit-review-btn');
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  const statusBox = document.getElementById('review-status-box');
+  const reviewForm = document.getElementById('review-form');
+
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      statusBox.classList.add('hidden');
+      reviewForm.classList.remove('hidden');
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+      statusBox.classList.remove('hidden');
+      reviewForm.classList.add('hidden');
+    });
+  }
+
+  // Gửi bình luận AJAX
+  if (reviewForm) {
+    reviewForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      
+      fetch('{% url "store:add_product_review" product.id %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Xử lý UI sau khi lưu thành công
+          const list = document.getElementById('reviews-list');
+          const emptyMsg = list.querySelector('.italic');
+          if (emptyMsg) emptyMsg.remove();
+
+          const starsHtml = Array(5).fill(0).map((_, i) => `
+            <svg class="w-3.4 h-3.4 ${i < data.rating ? 'fill-current' : 'text-gray-200'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+          `).join('');
+
+          if (data.is_update) {
+            // Nếu là cập nhật, tìm bình luận của chính mình trong danh sách để thay thế nội dung
+            // Lưu ý: Đơn giản nhất là reload hoặc tìm theo tên user (vì 1 user 1 review)
+            location.reload(); // Cách chắc chắn nhất để cập nhật Avg rating và UI đồng bộ
+            return;
+          }
+
+          const newReviewHtml = `
+            <div class="flex gap-4 p-4 rounded-2xl bg-blue-50/50 border border-blue-100 animate-pulse transition duration-1000">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 uppercase border border-blue-200">
+                  ${data.user.slice(0,1)}
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="font-bold text-gray-900 text-sm">${data.user}</p>
+                  <span class="text-[10px] text-gray-400 font-medium">Vừa xong</span>
+                </div>
+                <div class="flex text-yellow-400 mb-2">
+                  ${starsHtml}
+                </div>
+                <p class="text-sm text-gray-700 leading-relaxed">${data.content}</p>
+              </div>
+            </div>
+          `;
+          list.insertAdjacentHTML('afterbegin', newReviewHtml);
+          
+          // Chuyển về trạng thái "Cảm ơn"
+          statusBox.classList.remove('hidden');
+          reviewForm.classList.add('hidden');
+          
+          // Cập nhật text tiêu đề số lượng
+          const header = list.querySelector('h3');
+          if(header) {
+              const currentCount = parseInt(header.textContent.match(/\\d+/)[0]) || 0;
+              header.textContent = `Tất cả nhận xét (${currentCount + 1})`;
+          }
+
+          // Gỡ hiệu ứng sau 2s
+          setTimeout(() => {
+              const pulseItem = list.querySelector('.animate-pulse');
+              if(pulseItem) pulseItem.classList.remove('animate-pulse', 'bg-blue-50/50');
+          }, 2000);
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(err => {
+        console.error('Error submitting review:', err);
+        alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+      });
+    });
+  }
+</script>
 {% endblock %}

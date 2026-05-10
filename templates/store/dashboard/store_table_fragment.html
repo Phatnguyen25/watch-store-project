@@ -1,0 +1,33 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Tên Cửa hàng</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Địa chỉ</th>
+                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for store in stores %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 text-sm font-bold text-gray-900">{{ store.name }}</td>
+                <td class="px-6 py-4 text-sm text-gray-500 line-clamp-1 max-w-xs">{{ store.address }}</td>
+                <td class="px-6 py-4">
+                    <div class="flex flex-col lg:flex-row items-end lg:items-center justify-end gap-2 text-sm">
+                        <a href="{% url 'store:store_update' store.pk %}" class="text-blue-600 bg-blue-50 px-4 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition whitespace-nowrap text-center w-20 lg:w-auto">Sửa</a>
+                        <a href="{% url 'store:store_delete' store.pk %}" class="text-red-600 bg-red-50 px-4 py-1.5 rounded-lg font-bold hover:bg-red-100 transition whitespace-nowrap text-center w-20 lg:w-auto">Xóa</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="px-6 py-10 text-center text-gray-500 italic">Không tìm thấy cửa hàng nào khớp với tìm kiếm.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-6">
+    {% include 'store/dashboard/pagination.html' with page_obj=stores %}
+</div>

@@ -8,157 +8,129 @@
 
 Hệ thống được xây dựng trên kiến trúc **Micro-modular** (chia nhỏ module) để tối ưu hóa khả năng mở rộng và làm việc nhóm.
 
-- **Backend:** Django 5, PostGIS (Quản lý dữ liệu không gian).
-- **Frontend:** Tailwind CSS (Giao diện), Leaflet.js (Bản đồ).
-- **Infrastructure:** Docker hóa toàn diện.
+- **Backend:** Django 5.0.1
+- **Database:** PostgreSQL + PostGIS (Quản lý dữ liệu không gian)
+- **Frontend:** HTML, Tailwind CSS (qua CDN), Leaflet.js (Bản đồ)
+- **Infrastructure:** Docker hóa toàn diện bằng `docker-compose`.
 
 ---
 
-## 📂 Cấu trúc Dự án (New Architecture)
+## 🛠️ Công nghệ & Thư viện Chính
 
-Dự án đã được Refactor (tái cấu trúc) để tách biệt logic. Các thành viên vui lòng tuân thủ cấu trúc này:
+Dưới đây là các thư viện lõi (chi tiết xem trong `requirements.txt`):
+- **Django (5.0.1)**: Framework chính.
+- **psycopg2-binary**: Driver kết nối PostgreSQL.
+- **djangorestframework & djangorestframework-gis**: Xây dựng API và xử lý dữ liệu địa lý.
+- **django-leaflet**: Tích hợp bản đồ Leaflet.js cho phép hiển thị và tương tác tọa độ.
+- **django-json-widget**: Trình soạn thảo JSON trực quan trong Admin.
+- **xhtml2pdf**: Thư viện cho phép xuất báo cáo doanh thu ra file PDF (yêu cầu các thư viện C++ ở mức hệ thống như `libcairo2`, `libpango`).
+- **django-excel & pyexcel-xlsx**: Hỗ trợ nhập/xuất dữ liệu hàng loạt bằng file Excel.
+- **Pillow**: Xử lý ảnh sản phẩm.
 
+---
+
+## 🚀 Hướng dẫn Cài đặt & Chạy dự án từ Nguyên sơ đến Hoàn chỉnh
+
+### Yêu cầu hệ thống:
+- Đã cài đặt **Docker Desktop** và **Git**.
+
+### Bước 1: Lấy code về
+```bash
+git clone https://github.com/Phatnguyen25/watch-store-project.git
+cd watch-store-project
+```
+
+### Bước 2: Build & Khởi động Docker (Lần đầu tiên)
+Chạy lệnh sau để Docker tự động tải Image, cài đặt các thư viện hệ thống (`libcairo2`, `gdal`, v.v.) và các thư viện Python:
+```bash
+docker compose up --build -d
+```
+*(Quá trình này có thể mất ~5-10 phút tùy mạng).*
+Website sẽ chạy tại: **http://localhost:8001**
+
+### Bước 3: Cài đặt Database
+Có **2 CÁCH** để khởi tạo dữ liệu cho database: **(A) Restore từ file Backup** hoặc **(B) Chạy Migrate & Seed Script từ đầu**.
+
+#### CÁCH A: Phục hồi (Restore) từ file SQL Backup (KHUYÊN DÙNG)
+Dự án đã đính kèm sẵn file `watchstore_backup.sql` bao gồm đầy đủ cấu trúc bảng và dữ liệu mẫu (sản phẩm, đơn hàng từ đầu năm, cửa hàng, đánh giá...). Để phục hồi:
+
+```bash
+docker compose exec -T db psql -U admin -d watchstore_db < watchstore_backup.sql
+```
+Sau đó, bạn có thể đăng nhập ngay với:
+- Tên đăng nhập Admin: `admin` / Mật khẩu: `adminpass123`
+- Tài khoản KH 1: `user1` / Mật khẩu: `userpass123`
+
+#### CÁCH B: Tạo Database nguyên sơ & Seed dữ liệu thủ công
+Nếu bạn muốn tạo lại từ đầu mà không dùng file backup:
+```bash
+# 1. Chạy migrate để tạo cấu trúc bảng:
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py migrate
+
+# 2. Tạo tài khoản Admin (tùy ý nhập username/password):
+docker compose exec web python manage.py createsuperuser
+
+# 3. Chạy lần lượt các script để tạo dữ liệu mẫu (Seed Data):
+docker compose exec web python seed_data.py            # Tạo danh mục và sản phẩm
+docker compose exec web python seed_stores.py          # Tạo danh sách cửa hàng
+docker compose exec web python seed_coupons.py         # Tạo mã giảm giá
+docker compose exec web python seed_users_orders.py    # Tạo người dùng & đơn hàng cũ
+docker compose exec web python seed_reviews.py         # Tạo đánh giá sản phẩm
+docker compose exec web python seed_orders.py          # Tạo dữ liệu đơn hàng thống kê từ đầu năm đến nay
+docker compose exec web python manage.py seed_stock    # Khởi tạo lịch sử nhập xuất kho
+```
+
+---
+
+## 📂 Cấu trúc Dự án
+Dự án đã được Refactor (tái cấu trúc) để tách biệt logic:
 ```text
 watch-store/
 ├── core/                   # Cấu hình lõi (Settings, URLs tổng)
 ├── store/                  # App chính
-│   ├── models/             # 🟢 DATABASE MODELS (Đã tách nhỏ)
-│   │   ├── __init__.py     # Khai báo models
-│   │   ├── product.py      # Chứa Product, Category
-│   │   └── store.py        # Chứa Store (PostGIS)
+│   ├── models/             # 🟢 DATABASE MODELS (Đã tách nhỏ: product, store, order...)
 │   ├── views/              # 🟢 LOGIC VIEW (Đã tách nhỏ)
-│   │   ├── __init__.py
-│   │   ├── product_views.py
-│   │   └── store_views.py
-│   ├── urls.py             # Định tuyến API/View
-│   └── admin.py            # Cấu hình trang quản trị
+│   └── management/         # Các custom commands (VD: seed_stock)
 ├── templates/              # 🟢 GIAO DIỆN (HTML)
-│   ├── base.html           # Layout khung sườn (Chứa TailwindCDN)
-│   └── store/              # Giao diện của app Store
-│       ├── products/       # Trang danh sách/chi tiết sản phẩm
-│       └── stores/         # Trang bản đồ cửa hàng
 ├── docker-compose.yml      # Cấu hình Docker
-└── requirements.txt        # Danh sách thư viện
+├── Dockerfile              # Script build Docker image (cài C++ dependencies)
+├── requirements.txt        # Danh sách thư viện Python
+└── watchstore_backup.sql   # File backup CSDL đầy đủ
 ```
 
-### 🚦 Quy trình Git (Gitflow) - BẮT BUỘC
+---
 
-Để tránh xung đột code (Conflict), toàn bộ team phải tuân thủ luật sau:
+## 🚦 Quy trình làm việc nhóm (Gitflow)
 
-1. Các nhánh chính
-
-🔴 main: Nhánh sản phẩm. CẤM push trực tiếp. Chỉ Tech Lead mới được Merge.
-
-🟡 dev: Nhánh phát triển chung. Code phải chạy ổn định mới được merge vào đây.
-
-🟢 feature/...: Nhánh làm việc cá nhân.
-
-2. Quy trình làm việc hàng ngày
-
-Đồng bộ code:
-
+1. **Đồng bộ code trước khi làm việc:**
 ```bash
 git checkout dev
 git pull origin dev
 ```
 
-Tạo nhánh chức năng mới:
-
+2. **Tạo nhánh chức năng mới:**
 ```bash
-git checkout -b feature/ten-chuc-nang (VD: feature/product-detail)
+git checkout -b feature/ten-chuc-nang
 ```
 
-Code&Push
-
+3. **Lưu thay đổi & Đẩy code lên nhánh của mình:**
 ```bash
 git add .
-git commit -m "Mô tả rõ ràng công việc"
+git commit -m "Mô tả công việc"
 git push origin feature/ten-chuc-nang
 ```
 
-Ghép code: Vào GitHub tạo Pull Request (PR) từ nhánh feature vào nhánh dev.
+4. **Tạo Pull Request (PR):** Truy cập GitHub, tạo PR từ nhánh `feature/...` vào nhánh `dev` để review. Mọi thay đổi vào nhánh `main` do Tech Lead phụ trách.
 
-### 🚀 Cài đặt & Chạy dự án
-
-**\* Yêu cầu: Máy tính đã cài Docker Desktop.**
-Bước 1: Lấy code về
-
-```bash
-git clone [https://github.com/Phatnguyen25/watch-store-project.git](https://github.com/Phatnguyen25/watch-store-project.git)
-cd watch-store-project
-```
-
-Bước 2: Khởi động (Lần đầu sẽ mất ~5 phút)
-
-```bash
-docker-compose up --build
-```
-
-Bước 3: Quản lý Database & Tài khoản quản trị
-Mở terminal mới (hoặc tab mới) tại thư mục dự án:
-
-```bash
-# 1. Nếu bạn vừa pull code mới có thay đổi Models, chạy lệnh sau để cập nhật (Migration):
-docker compose exec web python manage.py makemigrations
-docker compose exec web python manage.py migrate
-
-# 2. Tạo tài khoản Admin (Quản trị viên) - Chỉ cần chạy 1 lần:
-docker compose exec web python manage.py createsuperuser
-```
-*(Lưu ý: Bạn có thể nhập Username là `admin`, nhập Email (hoặc bỏ trống), và nhập Password tùy ý. Trong lúc gõ password trên terminal sẽ không hiện dấu sao `*` để bảo mật, cứ gõ bình thường rồi Enter).*
-
-Bước 4: Nạp dữ liệu giả (Seed Data - Không bắt buộc)
-Nếu bạn muốn có sẵn dữ liệu để test giao diện mà không cần nhập tay, hãy chạy lần lượt các file seed bằng lệnh sau:
-
-```bash
-# Nạp danh mục và sản phẩm mẫu
-docker compose exec web python seed_data.py
-
-# Nạp danh sách các cửa hàng (Store Location)
-docker compose exec web python seed_stores.py
-
-# Nạp danh sách mã giảm giá ngẫu nhiên
-docker compose exec web python seed_coupons.py
-
-# Nạp dữ liệu User và các Đơn hàng ảo (Orders)
-docker compose exec web python seed_users_orders.py
-```
-
-### 🛠️ Công nghệ & Thư viện Chính
-
-**\*Tailwind CSS: Tích hợp qua CDN (trong base.html). Không cần cài Node.js.**
-
-**\*Django JSON Widget: Trình soạn thảo JSON trực quan trong Admin.**
-
-**\*Django Leaflet: Tích hợp bản đồ OpenStreetMap.**
-
-**\*PostGIS: Extension của PostgreSQL xử lý tọa độ, khoảng cách.**
+---
 
 ### 🐛 Khắc phục lỗi thường gặp
 
-**\*1. Lỗi "TemplateDoesNotExist: base.html"**
+1. **Lỗi `ModuleNotFoundError: No module named 'xhtml2pdf'`**
+- Nguyên nhân: Chưa build lại Docker image sau khi thêm thư viện.
+- Xử lý: Chạy lại lệnh `docker compose up --build -d`.
 
-Nguyên nhân: Sai cấu trúc thư mục templates.
-
-Xử lý: Đảm bảo file base.html nằm ở thư mục templates/ ngoài cùng (ngang hàng manage.py).
-
-**\*2. Lỗi "ModuleNotFoundError: No module named 'store.models'"**
-
-Nguyên nhân: Quên file **init**.py khi tách thư mục.
-
-Xử lý: Kiểm tra thư mục store/models/ đã có file **init**.py chưa.
-
-1. Tài khoản Quản trị viên (Admin):
-
-Tên đăng nhập: admin
-Mật khẩu: adminpass123
-2. Khách hàng 1 (User 1):
-
-Tên đăng nhập: user1
-Mật khẩu: userpass123
-Email: user1@example.com
-3. Khách hàng 2 (User 2):
-
-Tên đăng nhập: user2
-Mật khẩu: userpass123
-Email: user2@example.com
+2. **Lỗi khi xuất PDF hoặc lỗi giao diện bản đồ bị trắng**
+- Nguyên nhân: Thiếu các thư viện C++ ở hệ điều hành.
+- Xử lý: Các thư viện như `build-essential`, `libcairo2`, `gdal-bin` đã được khai báo trong `Dockerfile`. Đảm bảo container được build thành công từ file này.

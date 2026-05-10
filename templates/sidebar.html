@@ -1,16 +1,43 @@
-<aside class="w-64 bg-gray-900 text-white flex flex-col shadow-2xl z-10 h-full">
-    <div class="h-16 flex items-center justify-center border-b border-gray-800">
-      <a href="{% url 'store:dashboard_home' %}">
-        <span class="text-2xl mr-2">⚙️</span>
-        <span class="font-bold text-xl tracking-wider">O2O ADMIN</span>
-        </a>
+<style>
+    /* Tùy chỉnh thanh cuộn cho Sidebar */
+    #sidebar-nav::-webkit-scrollbar {
+        width: 4px;
+    }
+    #sidebar-nav::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    #sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.2); /* màu xám nhạt trong suốt */
+        border-radius: 10px;
+    }
+    #sidebar:hover #sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.5); /* hiện rõ hơn khi di chuột vào sidebar */
+    }
+</style>
+
+<aside id="sidebar" class="w-64 bg-gray-900 text-white flex flex-col shadow-2xl z-30 h-screen fixed lg:relative transition-all duration-300 transform overflow-hidden border-r border-gray-800/40">
+    <div class="h-[61px] flex items-center justify-between px-5 border-b border-gray-800/60 bg-gray-900">
+      <a href="{% url 'store:dashboard_home' %}" class="flex items-center gap-2 group">
+        <span class="text-xl transition-transform group-hover:rotate-90 duration-500">⚙️</span>
+        <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+            O2O ADMIN
+        </span>
+      </a>
+      <button id="sidebar-toggle-internal" class="p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
     </div>
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+    <nav id="sidebar-nav" class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         <a href="{% url 'store:dashboard_home' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if request.resolver_match.url_name == 'dashboard_home' %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>📊</span> Tổng quan
         </a>
         <a href="{% url 'store:dashboard_product_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'product' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>📦</span> Sản phẩm
+        </a>
+        <a href="{% url 'store:dashboard_stock_history' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'stock' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📜</span> Lịch sử kho
         </a>
         <a href="{% url 'store:dashboard_order_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'order' in request.path and 'dashboard' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>🛒</span> Đơn hàng
@@ -23,6 +50,12 @@
         </a>
         <a href="{% url 'store:dashboard_store_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'store' in request.path and 'dashboard' in request.path %}bg-blue-600 text-white shadow-lg{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
             <span>📍</span> Cửa hàng
+        </a>
+        <a href="{% url 'store:dashboard_report' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'report' in request.path %}bg-blue-600 text-white shadow-lg text-white font-bold{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>📈</span> Báo cáo Doanh thu
+        </a>
+        <a href="{% url 'store:dashboard_user_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {% if 'users' in request.path %}bg-blue-600 text-white shadow-lg text-white font-bold{% else %}text-gray-400 hover:text-white hover:bg-gray-800{% endif %}">
+            <span>👥</span> Người dùng
         </a>
     </nav>
     <div class="p-4 border-t border-gray-800">

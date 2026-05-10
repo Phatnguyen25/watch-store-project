@@ -4,42 +4,74 @@
 {% block header_title %}Quản lý Sản phẩm{% endblock %}
 
 {% block dashboard_content %}
-<div class="flex justify-between items-center mb-6">
-    <div class="relative w-96">
-        <input type="text" placeholder="Tìm kiếm đồng hồ..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
-        <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+{% if messages %}
+<div class="mb-4 space-y-2">
+    {% for message in messages %}
+    <div class="px-4 py-3 rounded-lg text-sm font-medium 
+        {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+        {{ message }}
     </div>
-    <a href="{% url 'store:product_create' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition flex items-center gap-2 text-sm">
-        <span>+</span> Thêm Sản Phẩm Mới
-    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Hướng dẫn Nhập Excel -->
+<div class="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8 shadow-sm">
+    <div class="flex items-start gap-4">
+        <div class="p-3 bg-blue-100 text-blue-600 rounded-xl text-xl">💡</div>
+        <div>
+            <h3 class="text-blue-900 font-bold mb-2">Hướng dẫn nhập dữ liệu (Excel Import)</h3>
+            <ul class="text-sm text-blue-800 space-y-2 list-disc pl-4">
+                <li><strong>Mã Danh Mục (ID):</strong> Tra cứu nhanh tại trang <a href="{% url 'store:dashboard_category_list' %}" class="font-bold underline">Quản lý Danh mục</a>.</li>
+                <li><strong>ID Sản phẩm:</strong> Để **cập nhật**, hãy điền đúng ID. Để **thêm mới**, hãy để **trống** cột ID.</li>
+                <li><strong>Số Lượng Nhập Thêm:</strong> Hệ thống sẽ tự động **cộng dồn** con số này vào tồn kho cũ.</li>
+                <li><strong>Mẹo:</strong> Hãy bấm nút **"Xuất Excel"** để lấy file dữ liệu chuẩn nhất làm mẫu.</li>
+            </ul>
+        </div>
+    </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mã SP</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Sản phẩm</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Giá bán</th>
-                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Thao tác</th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-            {% for p in products %}
-            <tr class="hover:bg-gray-50 transition">
-                <td class="px-6 py-4 text-sm font-bold text-gray-500">#{{ p.id }}</td>
-                <td class="px-6 py-4 flex items-center">
-                    {% if p.image %}<img src="{{ p.image.url }}" class="h-10 w-10 rounded-md object-cover border mr-3" />{% else %}<div class="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center mr-3">⌚</div>{% endif %}
-                    <span class="text-sm font-bold text-gray-900">{{ p.name }}</span>
-                </td>
-                <td class="px-6 py-4 text-sm text-blue-600 font-bold">{{ p.price|intcomma }} ₫</td>
-                <td class="px-6 py-4 text-right text-sm font-medium">
-                    <a href="{% url 'store:product_update' p.pk %}" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md mr-2 hover:bg-blue-100">Sửa</a>
-                    <a href="{% url 'store:product_delete' p.pk %}" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-md hover:bg-red-100">Xóa</a>
-                </td>
-            </tr>
+<form method="GET" class="flex justify-between items-center mb-6">
+    <div class="flex items-center space-x-2 flex-1 max-w-2xl">
+        <div class="relative flex-1">
+            <input type="text" name="q" value="{{ query }}" placeholder="Tìm kiếm đồng hồ..." class="dashboard-search w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
+            <button type="submit" class="absolute left-3 top-2.5 text-gray-400">🔍</button>
+        </div>
+        <select name="category_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="this.form.submit()">
+            <option value="">Tất cả danh mục</option>
+            {% for c in categories %}
+            <option value="{{ c.id }}" {% if category_id == c.id|stringformat:"i" %}selected{% endif %}>{{ c.name }}</option>
             {% endfor %}
-        </tbody>
-    </table>
+        </select>
+        <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" onchange="this.form.submit()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="active" {% if status == 'active' %}selected{% endif %}>Đang bán</option>
+            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Tạm ẩn</option>
+        </select>
+    </div>
+    <div class="flex items-center gap-2 ml-4">
+        <a href="{% url 'store:download_product_template' %}" class="bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg font-bold hover:bg-gray-300 transition flex items-center text-sm whitespace-nowrap">
+            📝 Tải file mẫu
+        </a>
+        <a href="{% url 'store:export_products_excel' %}" class="bg-green-600 text-white px-4 py-2.5 rounded-lg font-bold shadow-md hover:bg-green-700 transition flex items-center text-sm whitespace-nowrap">
+            ⬇️ Xuất Excel
+        </a>
+        <label for="excel-upload" class="bg-yellow-500 text-white px-4 py-2.5 rounded-lg font-bold shadow-md hover:bg-yellow-600 transition flex items-center cursor-pointer text-sm whitespace-nowrap">
+            ⬆️ Nhập Excel
+        </label>
+        <a href="{% url 'store:product_create' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-blue-700 transition flex items-center gap-2 text-sm whitespace-nowrap">
+            <span>+</span> Thêm Sản Phẩm Mới
+        </a>
+    </div>
+</form>
+
+<!-- Form ẩn để upload excel -->
+<form id="import-form" action="{% url 'store:import_products_excel' %}" method="post" enctype="multipart/form-data" class="hidden">
+    {% csrf_token %}
+    <input type="file" id="excel-upload" name="excel_file" accept=".xls,.xlsx" onchange="if(confirm('Bạn có chắc chắn muốn nhập dữ liệu từ file này?')) { document.getElementById('import-form').submit(); }">
+</form>
+
+<div id="dashboard-table-container">
+    {% include 'store/dashboard/product_table_fragment.html' %}
 </div>
 {% endblock %}

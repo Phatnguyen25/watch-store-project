@@ -8,6 +8,7 @@ class Coupon(models.Model):
         verbose_name="Phần trăm giảm (%)"
     )
     active = models.BooleanField(default=True, verbose_name="Còn hiệu lực")
+    valid_to = models.DateTimeField(verbose_name="Hạn sử dụng", null=True, blank=True)
     
     def __str__(self):
         return f"{self.code} (-{self.discount_percent}%)"

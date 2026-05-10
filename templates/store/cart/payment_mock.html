@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Cổng Thanh Toán Mô Phỏng - Watch Store{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-105">
+    
+    <div class="bg-blue-600 p-6 text-center">
+      <h2 class="text-2xl font-bold text-white tracking-wide flex items-center justify-center">
+        <svg class="w-8 h-8 mr-2 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+        MÔ PHỎNG VNPAY
+      </h2>
+    </div>
+
+    <div class="p-8">
+      <div class="mb-6">
+        <p class="text-sm text-gray-500 mb-1">Mã Giao Dịch Đơn Hàng</p>
+        <p class="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">#{{ order.id }}</p>
+      </div>
+
+      <div class="mb-8">
+        <p class="text-sm text-gray-500 mb-1">Tổng Số Tiền Thanh Toán</p>
+        <p class="text-3xl font-extrabold text-blue-600 border-b border-gray-100 pb-2">
+            {% load humanize %}
+            {{ order.total_price|intcomma }} VNĐ
+        </p>
+      </div>
+
+      <p class="text-sm text-gray-500 mb-6 italic text-center">
+        * Đây là môi trường giả lập (Sandbox). Khi kết nối thực tế với Code VNPAY, trang này sẽ được Bypass tự động bởi thẻ Redirect *
+      </p>
+
+      <div class="space-y-4">
+        <!-- Nút giả lập thành công -->
+        <a href="{{ vnp_return_url }}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition">
+          Xác Nhận (Test Mật Khẩu Thành Công)
+        </a>
+        
+        <!-- Nút giả lập thất bại -->
+        <a href="/payment/return/?vnp_ResponseCode=24&vnp_TxnRef={{ order.id }}" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+          Hủy Cố Ý (Test Giao Dịch Thất Bại)
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -21,19 +21,21 @@
             Đặt hàng trực tuyến, nhận hàng và bảo hành tại cửa hàng gần bạn nhất
             chỉ với một cú click.
           </p>
-          <div class="mt-8 sm:flex sm:justify-center lg:justify-start gap-4">
-            <a
-              href="#new-arrivals"
-              class="w-full sm:w-auto flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg transition shadow-lg hover:shadow-blue-500/50"
-            >
-              Khám phá Bộ Sưu Tập
-            </a>
-            <a
-              href="{% url 'store:store_locator' %}"
-              class="mt-3 sm:mt-0 w-full sm:w-auto flex items-center justify-center px-8 py-3 border border-gray-600 text-base font-bold rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white md:py-4 md:text-lg transition"
-            >
-              📍 Tìm Cửa Hàng Gần Nhất
-            </a>
+          <div class="mt-8">
+            <div class="sm:flex sm:justify-center lg:justify-start gap-4">
+              <a
+                href="#new-arrivals"
+                class="w-full sm:w-auto flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg transition shadow-lg hover:shadow-blue-500/50"
+              >
+                Khám phá Bộ Sưu Tập
+              </a>
+              <a
+                href="{% url 'store:store_locator' %}"
+                class="mt-3 sm:mt-0 w-full sm:w-auto flex items-center justify-center px-8 py-3 border border-gray-600 text-base font-bold rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white md:py-4 md:text-lg transition"
+              >
+                📍 Tìm Cửa Hàng Gần Nhất
+              </a>
+            </div>
           </div>
         </div>
       </main>
@@ -48,36 +50,69 @@
   </div>
 </div>
 
-<div class="bg-white py-12 border-b border-gray-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
-      <div
-        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
-      >
-        <span class="text-4xl mb-4">📱</span>
-        <h3 class="text-lg font-bold text-gray-900">1. Đặt hàng Online</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          Giao diện trực quan, thông tin minh bạch.
+<div class="bg-white py-16 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div
+      class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4"
+    >
+      <div>
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center">
+          <span class="text-yellow-500 mr-3 text-4xl">🔥</span> Sản Phẩm Bán Chạy
+        </h2>
+        <p class="text-gray-500 mt-2 font-medium">
+          Các tuyệt tác đồng hồ được giới tinh hoa săn lùng nhiều nhất hiện nay.
         </p>
       </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {% for p in best_sellers %}
       <div
-        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
+        class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-yellow-200 overflow-hidden group flex flex-col relative"
       >
-        <span class="text-4xl mb-4">🗺️</span>
-        <h3 class="text-lg font-bold text-gray-900">2. Thuật toán PostGIS</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          Định vị thông minh cửa hàng gần bạn nhất.
-        </p>
+        <div class="absolute top-0 right-0 w-16 h-16 overflow-hidden z-20">
+           <div class="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-black py-1 shadow-lg w-[200%] text-center transform rotate-45 translate-x-3 translate-y-3">BEST</div>
+        </div>
+        <a
+          href="{% url 'store:product_detail' p.pk %}"
+          class="relative h-72 overflow-hidden bg-gray-50 block"
+        >
+          {% if p.image %}
+          <img
+            src="{{ p.image.url }}"
+            alt="{{ p.name }}"
+            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+          />
+          {% else %}
+          <div
+            class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200 text-5xl"
+          >
+            ⌚
+          </div>
+          {% endif %}
+        </a>
+        <div class="p-5 flex-grow flex flex-col justify-between">
+          <h3
+            class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight hover:text-blue-600 transition"
+          >
+            <a href="{% url 'store:product_detail' p.pk %}">{{ p.name }}</a>
+          </h3>
+          <div class="mt-4">
+            <p class="text-xl font-black text-red-600 mb-4">
+              {{ p.price|intcomma }} ₫
+            </p>
+            <div class="flex space-x-2">
+              <a
+                href="{% url 'store:add_to_cart' p.pk %}"
+                class="flex-1 text-center bg-gray-900 text-white py-2.5 rounded-lg text-sm font-bold hover:bg-black shadow-md transition"
+              >
+                Trải nghiệm
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
-      <div
-        class="flex flex-col items-center p-6 bg-blue-50/50 rounded-2xl border border-blue-100 transition hover:shadow-md"
-      >
-        <span class="text-4xl mb-4">🏪</span>
-        <h3 class="text-lg font-bold text-gray-900">3. Trải nghiệm Offline</h3>
-        <p class="mt-2 text-sm text-gray-500">
-          Nhận hàng và bảo hành tại điểm O2O.
-        </p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </div>
@@ -88,58 +123,29 @@
       Khám Phá Theo Danh Mục
     </h2>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {% for cat in categories %}
       <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
+        href="{% url 'store:category_products' cat.slug %}"
+        class="relative rounded-2xl overflow-hidden group h-32 md:h-40 flex items-center justify-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
       >
-        <img
-          src="https://images.unsplash.com/photo-1622434641406-a158123450f9?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
+        <!-- Nền dải màu Gradient lộng lẫy luân phiên từng danh mục -->
+        <div class="absolute inset-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500 z-0 bg-gradient-to-br {% cycle 'from-slate-800 to-gray-900' 'from-blue-900 to-indigo-900' 'from-emerald-900 to-teal-900' 'from-rose-900 to-red-900' 'from-purple-900 to-fuchsia-900' 'from-amber-900 to-orange-900' 'from-cyan-900 to-blue-900' 'from-stone-800 to-neutral-900' %}"></div>
+        
+        <!-- Họa tiết Kính (Glassmorphism) -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-white/10 z-10"></div>
+        
+        <!-- Hiệu ứng viền sáng mờ khi Hover -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 border-2 border-white/20 rounded-2xl transition-opacity duration-500 z-20 scale-95 group-hover:scale-100"></div>
+
+        <!-- Tiêu đề Danh Mục -->
         <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >ĐỒNG HỒ NAM</span
+          class="relative text-white font-extrabold text-xl md:text-2xl tracking-[0.2em] z-30 text-center px-4 drop-shadow-xl group-hover:scale-110 transition-transform duration-500"
+          >{{ cat.name|upper }}</span
         >
       </a>
-      <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1508656961554-47b2c5890c9b?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
-        <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >ĐỒNG HỒ NỮ</span
-        >
-      </a>
-      <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1548171915-e76a3e1eb520?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
-        <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >MÁY CƠ (AUTO)</span
-        >
-      </a>
-      <a
-        href="#"
-        class="relative rounded-xl overflow-hidden group h-32 md:h-40 flex items-center justify-center bg-gray-900 shadow-sm"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=500&q=80"
-          class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-500"
-        />
-        <span
-          class="relative text-white font-bold text-lg md:text-xl tracking-wide z-10"
-          >SMARTWATCH</span
-        >
-      </a>
+      {% empty %}
+      <p class="text-gray-500 col-span-full">Chưa có danh mục nào hiển thị.</p>
+      {% endfor %}
     </div>
   </div>
 </div>
@@ -260,41 +266,8 @@
       Gợi Ý Dành Riêng Cho Bạn
     </h2>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-      {% for p in products %}
-      <div
-        class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all border border-gray-100 overflow-hidden group"
-      >
-        <a
-          href="{% url 'store:product_detail' p.pk %}"
-          class="relative h-48 md:h-56 overflow-hidden bg-gray-100 block"
-        >
-          {% if p.image %}
-          <img
-            src="{{ p.image.url }}"
-            alt="{{ p.name }}"
-            class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
-          />
-          {% else %}
-          <div
-            class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-200 text-3xl"
-          >
-            ⌚
-          </div>
-          {% endif %}
-        </a>
-        <div class="p-4">
-          <h3
-            class="text-sm md:text-base font-bold text-gray-900 mb-1 truncate hover:text-blue-600"
-          >
-            <a href="{% url 'store:product_detail' p.pk %}">{{ p.name }}</a>
-          </h3>
-          <p class="text-base md:text-lg font-black text-blue-600 mt-2">
-            {{ p.price|intcomma }} ₫
-          </p>
-        </div>
-      </div>
-      {% endfor %}
+    <div id="product-grid" class="transition-all duration-300">
+        {% include 'store/product/product_grid_fragment.html' %}
     </div>
 
     <div class="mt-12 text-center">

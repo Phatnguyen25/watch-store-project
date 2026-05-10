@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hóa đơn đặt hàng</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .header { background-color: #1d4ed8; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }
+        .details, .items { margin-top: 20px; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table th, .table td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        .total { font-size: 18px; font-weight: bold; text-align: right; margin-top: 20px; color: #b91c1c; }
+        .footer { margin-top: 30px; font-size: 12px; text-align: center; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Cảm ơn bạn đã đặt hàng tại Watch Store O2O!</h2>
+        </div>
+        
+        <div class="details">
+            <p>Xin chào <strong>{{ order.full_name }}</strong>,</p>
+            <p>Chúng tôi đã nhận được đơn đặt hàng <strong>#{{ order.id }}</strong> của bạn. Vui lòng kiểm tra lại thông tin bên dưới:</p>
+            
+            <ul>
+                <li><strong>SĐT:</strong> {{ order.phone }}</li>
+                <li><strong>Địa chỉ giao hàng:</strong> {{ order.address }}</li>
+                <li><strong>Trạng thái:</strong> {{ order.get_status_display }}</li>
+            </ul>
+        </div>
+        
+        <div class="items">
+            <h3>Chi Tiết Sản Phẩm</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>SL</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }} đ</td>
+                        <td>{{ item.total }} đ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="total">
+                Tổng cộng: {{ cart_total }} đ
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email support@watchstore.com.</p>
+            <p>Watch Store O2O - Đẳng cấp trên cổ tay, Trải nghiệm O2O vượt trội.</p>
+        </div>
+    </div>
+</body>
+</html>

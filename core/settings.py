@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'leaflet',
     'django_json_widget',
     'store',  # Thêm app store vào đây
-    
+    'django_excel',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +149,35 @@ if os.name == 'nt':
     # Kiểm tra file trong C:\OSGeo4W\bin xem tên chính xác là gì (307, 308 hay 309)
     GDAL_LIBRARY_PATH = OSGEO4W_ROOT + r'\bin\gdal309.dll' 
     GEOS_LIBRARY_PATH = OSGEO4W_ROOT + r'\bin\geos_c.dll'
+
+# ==========================================
+# CẤU HÌNH BẢN ĐỒ LEAFLET
+# ==========================================
+LEAFLET_CONFIG = {
+    # Tile layer OpenStreetMap chuẩn
+    'TILES': [('OpenStreetMap', 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        'attribution': '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        'maxZoom': 19,
+    })],
+    # Mặc định zoom vào Việt Nam
+    'DEFAULT_CENTER': (16.047079, 108.206230),  # Trung tâm VN (Đà Nẵng)
+    'DEFAULT_ZOOM': 6,
+    'MIN_ZOOM': 2,
+    'MAX_ZOOM': 19,
+    'SCALE': 'metric',
+    # Callback JS được gọi sau khi map init xong — dùng để geocoding bắt được map instance
+    'MAP_ID': 'geostore_map_ready',
+}
+
+# ==========================================
+# CẤU HÌNH GỬI EMAIL THỰC TẾ
+# ==========================================
+# Kiểm tra nếu chưa cấu hình EMAIL_HOST_USER thì dùng giao diện Console để test tránh lỗi
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'anhemtaothieunang@gmail.com')
+# App Password loại bỏ khoảng trắng
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'kuuuyeyihdyymwar')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

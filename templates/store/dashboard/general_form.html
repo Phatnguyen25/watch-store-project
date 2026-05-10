@@ -19,6 +19,19 @@
             outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); background-color: #ffffff;
         }
         .custom-django-form input[type="checkbox"] { width: auto; margin-top: 0.5rem; transform: scale(1.2); cursor: pointer; }
+
+        /* Geocode status indicator */
+        #geocode-status {
+            display: none;
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 0.4rem;
+            font-weight: 600;
+        }
+        #geocode-status.loading { display: block; background: #eff6ff; color: #1d4ed8; }
+        #geocode-status.success { display: block; background: #f0fdf4; color: #16a34a; }
+        #geocode-status.error   { display: block; background: #fef2f2; color: #dc2626; }
     </style>
 {% endblock %}
 
@@ -26,11 +39,155 @@
 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <form method="POST" enctype="multipart/form-data" class="p-8">
         {% csrf_token %}
+        
+        {% if form.instance.pk %}
+        <div class="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+            <div>
+                <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Dữ liệu đang chỉnh sửa</h2>
+                <div class="flex items-center gap-2">
+                    <span class="bg-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">#ID: {{ form.instance.pk }}</span>
+                    {% if form.instance.category %}
+                    <span class="bg-gray-100 text-gray-600 text-[10px] font-black px-3 py-1 rounded-full border border-gray-200">📁 Mã DM: {{ form.instance.category.id }}</span>
+                    {% endif %}
+                    {% if form.instance.name %}
+                    <span class="text-gray-900 font-bold text-lg">{{ form.instance.name }}</span>
+                    {% elif form.instance.code %}
+                    <span class="text-gray-900 font-bold text-lg">{{ form.instance.code }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-[10px] text-gray-400 font-medium italic">Cập nhật lần cuối: {{ form.instance.updated_at|default:"Vừa xong" }}</div>
+        </div>
+        {% endif %}
+
         <div class="custom-django-form space-y-2">{{ form.as_p }}</div>
+        
+        <!-- Trạng thái geocoding -->
+        <div id="geocode-status"></div>
+
         <div class="flex justify-end gap-4 border-t border-gray-100 pt-6 mt-8">
             <a href="javascript:history.back()" class="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-bold transition shadow-sm">Hủy</a>
             <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition shadow-md">Lưu Dữ Liệu</button>
         </div>
     </form>
 </div>
+
+<script>
+// ============================================================
+// GEOCODING: Tự động tìm tọa độ khi nhập địa chỉ
+// ============================================================
+(function () {
+    'use strict';
+
+    let leafletMap = null;
+
+    // 1. Lắng nghe event 'map:init' từ django-leaflet (Cách chuẩn nhất)
+    window.addEventListener('map:init', function (e) {
+        console.log("Leaflet Map initialized via 'map:init' event:", e.detail.map);
+        leafletMap = e.detail.map;
+    });
+
+    // --- Hàm áp dụng tọa độ lên bản đồ ---
+    function applyToMap(lat, lng) {
+        // 1. Cập nhật hidden WKT field của django-leaflet (POINT lng lat)
+        const locationInput = document.querySelector('textarea[name="location"], input[name="location"]');
+        if (locationInput) {
+            locationInput.value = `POINT (${lng} ${lat})`;
+            locationInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // 2. Lấy map instance
+        function getMap() {
+            if (leafletMap) return leafletMap;
+            
+            // Fallback: Tìm qua window.maps
+            if (window.maps) {
+                const keys = Object.keys(window.maps);
+                if (keys.length > 0) return window.maps[keys[0]];
+            }
+
+            // Fallback: Quét DOM tìm property nội bộ của Leaflet
+            const container = document.querySelector('.leaflet-container');
+            if (container && container._leaflet_map) return container._leaflet_map;
+            
+            return null;
+        }
+
+        const map = getMap();
+        if (map) {
+            console.log("Updating map to:", lat, lng);
+            map.setView([lat, lng], 16);
+            
+            // Xóa marker cũ nếu có
+            if (window._geocodeMarker) {
+                window._geocodeMarker.remove();
+            }
+
+            // Thêm marker mới
+            window._geocodeMarker = L.marker([lat, lng]).addTo(map);
+            window._geocodeMarker.bindPopup(
+                `<div style="text-align:center">
+                    <b>📍 Vị trí tìm thấy</b><br/>
+                    <small>${lat.toFixed(6)}, ${lng.toFixed(6)}</small>
+                </div>`
+            ).openPopup();
+            
+            map.invalidateSize();
+        } else {
+            console.error("Could not find Leaflet map instance to center.");
+        }
+    }
+
+    // --- Hàm gọi Nominatim API ---
+    function geocodeAddress(address, statusEl) {
+        statusEl.className = 'loading';
+        statusEl.textContent = '🔍 Đang tìm tọa độ...';
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=vn`;
+
+        fetch(url, { headers: { 'Accept-Language': 'vi', 'User-Agent': 'WatchStore/1.0' } })
+            .then(res => res.json())
+            .then(data => {
+                if (!data || data.length === 0) {
+                    statusEl.className = 'error';
+                    statusEl.textContent = '❌ Không tìm thấy. Hãy nhập địa chỉ rõ ràng hơn.';
+                    return;
+                }
+                const lat = parseFloat(data[0].lat);
+                const lng = parseFloat(data[0].lon);
+                
+                statusEl.className = 'success';
+                statusEl.textContent = `✅ Tìm thấy: ${data[0].display_name.substring(0, 80)}...`;
+
+                applyToMap(lat, lng);
+            })
+            .catch(err => {
+                console.error("Geocoding error:", err);
+                statusEl.className = 'error';
+                statusEl.textContent = '⚠️ Lỗi kết nối API. Vui lòng thử lại sau.';
+            });
+    }
+
+    // --- Khởi tạo event listeners ---
+    document.addEventListener('DOMContentLoaded', function () {
+        const addressInput = document.getElementById('id_address');
+        const statusEl = document.getElementById('geocode-status');
+        if (!addressInput || !statusEl) return;
+
+        let debounceTimer = null;
+        addressInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+            if (query.length < 5) {
+                statusEl.className = '';
+                statusEl.textContent = '';
+                return;
+            }
+            debounceTimer = setTimeout(() => {
+                geocodeAddress(query, statusEl);
+            }, 900);
+        });
+    });
+})();
+</script>
 {% endblock %}

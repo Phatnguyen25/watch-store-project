@@ -1,0 +1,50 @@
+{% load humanize %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Mã Đơn</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Khách hàng</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Ngày Đặt</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Tổng Tiền</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Trạng Thái</th>
+                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for order in orders %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 text-sm font-bold text-gray-900 w-24">#{{ order.id }}</td>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-bold text-gray-900">{{ order.full_name }}</div>
+                    <div class="text-xs text-gray-500 mt-1">📞 {{ order.phone }}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                <td class="px-6 py-4 text-sm text-blue-600 font-bold whitespace-nowrap">{{ order.total_price|intcomma }} ₫</td>
+                <td class="px-6 py-4 text-sm">
+                    <span class="px-3 py-1 inline-block rounded-full text-xs font-semibold
+                      {% if order.status == 'Pending' %}bg-yellow-100 text-yellow-800
+                      {% elif order.status == 'Processing' %}bg-blue-100 text-blue-800
+                      {% elif order.status == 'Shipped' %}bg-purple-100 text-purple-800
+                      {% elif order.status == 'Delivered' %}bg-green-100 text-green-800
+                      {% else %}bg-red-100 text-red-800{% endif %}">
+                      {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right text-sm font-medium flex justify-end gap-2">
+                    <a href="{% url 'store:dashboard_order_detail' order.pk %}" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 font-bold shadow-sm border border-blue-100 transition">Chi tiết</a>
+                    <a href="{% url 'store:dashboard_order_update' order.pk %}" class="text-yellow-600 bg-yellow-50 px-3 py-1.5 rounded-md hover:bg-yellow-100 font-bold shadow-sm border border-yellow-100 transition">Cập Nhật</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic">Không tìm thấy đơn hàng nào khớp với tìm kiếm.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-6">
+    {% include 'store/dashboard/pagination.html' with page_obj=orders %}
+</div>

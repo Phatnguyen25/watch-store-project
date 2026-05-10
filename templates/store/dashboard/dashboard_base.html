@@ -6,28 +6,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}O2O Admin{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Tùy chỉnh thanh cuộn cho toàn hệ thống Dashboard */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.5);
+        }
+        
+        /* Đảm bảo Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
     {% block extra_head %}{% endblock %}
   </head>
   <body class="bg-gray-50 font-sans flex h-screen overflow-hidden">
     {% include 'sidebar.html' %}
 
-    <main class="flex-1 flex flex-col overflow-y-auto bg-gray-50 relative">
-      <header
-        class="h-16 bg-white shadow-sm flex items-center justify-between px-8 sticky top-0 z-20"
-      >
-        <h2 class="text-xl font-bold text-gray-800">
-          {% block header_title %}Dashboard{% endblock %}
-        </h2>
-        <div class="flex items-center gap-4 text-sm font-medium text-gray-600">
-          <span>👋 Xin chào, Tech Lead</span>
-          <img
-            src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff"
-            class="w-8 h-8 rounded-full shadow-sm"
-          />
+    <main id="main-content" class="flex-1 flex flex-col overflow-y-auto bg-gray-50 relative transition-all duration-300">
+      <header class="h-[61px] bg-white/90 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-20 border-b border-gray-200/80">
+        <div class="flex items-center gap-4">
+            <button id="sidebar-toggle" class="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-all border border-transparent hover:border-gray-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <h2 class="text-lg font-bold text-gray-800 tracking-tight">
+                {% block header_title %}Dashboard{% endblock %}
+            </h2>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex flex-col items-end hidden sm:flex leading-tight">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Quản trị viên</span>
+            <span class="text-sm font-bold text-gray-700">Tech Lead</span>
+          </div>
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-blue-400 p-0.5 shadow-md shadow-blue-100">
+            <img
+                src="https://ui-avatars.com/api/?name=Admin&background=fff&color=2563eb"
+                class="w-full h-full rounded-[10px] object-cover"
+            />
+          </div>
         </div>
       </header>
 
       <div class="p-8">{% block dashboard_content %}{% endblock %}</div>
     </main>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const toggleBtnInternal = document.getElementById('sidebar-toggle-internal');
+        const mainContent = document.getElementById('main-content');
+
+        // Hàm áp dụng trạng thái sidebar
+        const setSidebarState = (isCollapsed) => {
+            if (isCollapsed) {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.add('lg:w-0');
+                sidebar.classList.remove('lg:w-64');
+                toggleBtn.classList.remove('hidden'); // Hiện nút bên ngoài khi sidebar ẩn
+                localStorage.setItem('sidebar-collapsed', 'true');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.remove('lg:w-0');
+                sidebar.classList.add('lg:w-64');
+                toggleBtn.classList.add('hidden'); // Ẩn nút bên ngoài khi sidebar hiện
+                localStorage.setItem('sidebar-collapsed', 'false');
+            }
+        };
+
+        // Kiểm tra trạng thái đã lưu
+        const savedState = localStorage.getItem('sidebar-collapsed') === 'true';
+        setSidebarState(savedState);
+
+        const toggleAction = () => {
+            const isCurrentlyCollapsed = sidebar.classList.contains('-translate-x-full');
+            setSidebarState(!isCurrentlyCollapsed);
+        };
+
+        toggleBtn.addEventListener('click', toggleAction);
+        if (toggleBtnInternal) {
+            toggleBtnInternal.addEventListener('click', toggleAction);
+        }
+
+        // Universal Dashboard Live Search
+        const dashboardSearch = document.querySelector('.dashboard-search');
+        const tableContainer = document.getElementById('dashboard-table-container');
+        let searchDebounce;
+
+        if (dashboardSearch && tableContainer) {
+            dashboardSearch.addEventListener('input', function() {
+                clearTimeout(searchDebounce);
+                const query = this.value;
+                const url = new URL(window.location.href);
+                url.searchParams.set('q', query);
+                url.searchParams.set('page', 1); // Reset về trang 1 khi tìm kiếm
+
+                // Hiển thị trạng thái loading (mờ bảng)
+                tableContainer.style.opacity = '0.5';
+
+                searchDebounce = setTimeout(() => {
+                    fetch(url.toString(), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        tableContainer.innerHTML = html;
+                        tableContainer.style.opacity = '1';
+                        // Cập nhật URL trình duyệt không cần reload
+                        window.history.pushState({}, '', url.toString());
+                    })
+                    .catch(err => {
+                        console.error('Dashboard search error:', err);
+                        tableContainer.style.opacity = '1';
+                    });
+                }, 300);
+            });
+        }
+    </script>
   </body>
 </html>
